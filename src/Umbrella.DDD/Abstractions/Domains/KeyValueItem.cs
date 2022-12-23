@@ -20,7 +20,7 @@ namespace Umbrella.DDD.Abstractions.Domains
         /// <summary>
         /// Empty constructor for serialization
         /// </summary>
-        public KeyValueItem()
+        protected KeyValueItem()
         {
             Code = "TBD";
             DisplayValue = "Undefined";

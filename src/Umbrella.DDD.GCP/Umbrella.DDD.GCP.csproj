@@ -5,6 +5,7 @@
 		<Nullable>enable</Nullable>
 		<TargetFramework>netstandard2.1</TargetFramework>
 		<LangVersion>10.0</LangVersion>
+		<NoWarn>S3925;S112</NoWarn>
 	</PropertyGroup>
 
 	<PropertyGroup>

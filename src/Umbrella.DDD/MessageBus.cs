@@ -48,14 +48,7 @@ namespace Umbrella.DDD
             Parallel.ForEach(handlers, x =>
             {
                 var index = handlers.IndexOf(x);
-                if (x.CanHandleThisMessage(msg))
-                {
-                    var occurredEx = x.TryHandleThisMessage(msg);
-                    if (occurredEx is null)
-                        this._Logger.LogError("Handler #{handlerIndex}: consumed message of {type} wiht no errors", index, typeof(T));
-                    else
-                        this._Logger.LogError(occurredEx, "Handler #{handlerIndex}: consumed message of {type} with errors", index, typeof(T));
-                }
+                RunHandler(x, msg, index);
             });
 
             // Check if saga need to be run
@@ -64,32 +57,7 @@ namespace Umbrella.DDD
             Parallel.ForEach(sagas, x =>
             {
                 var index = sagas.IndexOf(x);
-                try
-                {
-                    // restore status
-                    x.RefreshStatus();
-                    if (x.Status == null)
-                        throw new NullReferenceException("Unexpcted Saga status null after refresh");
-                    if (x.Status.IsRunning)
-                    {
-                        // continue the saga
-                    }
-                    else if (!x.Status.IsCompleted)
-                    {
-                        // start the saga if reguired
-                        if (x.StarterEventType == typeof(T))
-                        {
-                            x.Start(msg);
-                        }
-                        else
-                            this._Logger.LogWarning("Saga #{sagaIndex}: it is not completed but I cannot start it with {messageType}", index, typeof(T));
-                    }
-                    x.PersistStatus();
-                }
-                catch (Exception ex)
-                {
-                    this._Logger.LogError(ex, "Saga #{sagaIndex}: consumed message of {type} with errors", index, typeof(T));
-                }
+                RunSaga<T>(x, msg, index);
             });
             return msgId;
         }
@@ -101,6 +69,48 @@ namespace Umbrella.DDD
         public void UsingThisQueueFor<T>(string queueName) where T : IMessage
         {
             this._Publisher.UsingThisQueueFor<T>(queueName);
+        }
+
+        private void RunHandler<T>(IMessageHandler<T> handler, T msg, int zeroBasedIndex) where T : IMessage
+        {
+            if (handler.CanHandleThisMessage(msg))
+            {
+                var occurredEx = handler.TryHandleThisMessage(msg);
+                if (occurredEx is null)
+                    this._Logger.LogError("Handler #{handlerIndex}: consumed message of {type} wiht no errors", zeroBasedIndex, typeof(T));
+                else
+                    this._Logger.LogError(occurredEx, "Handler #{handlerIndex}: consumed message of {type} with errors", zeroBasedIndex, typeof(T));
+            }
+        }
+
+        private void RunSaga<T>(ISaga saga, T msg, int zeroBasedIndex) where T : IMessage
+        {
+            try
+            {
+                // restore status
+                saga.RefreshStatus();
+                if (saga.Status == null)
+                    throw new NullReferenceException("Unexpcted Saga status null after refresh");
+                if (saga.Status.IsRunning)
+                {
+                    // continue the saga
+                }
+                else if (!saga.Status.IsCompleted)
+                {
+                    // start the saga if reguired
+                    if (saga.StarterEventType == typeof(T))
+                    {
+                        saga.Start(msg);
+                    }
+                    else
+                        this._Logger.LogWarning("Saga #{sagaIndex}: it is not completed but I cannot start it with {messageType}", zeroBasedIndex, typeof(T));
+                }
+                saga.PersistStatus();
+            }
+            catch (Exception ex)
+            {
+                this._Logger.LogError(ex, "Saga #{sagaIndex}: consumed message of {type} with errors", zeroBasedIndex, typeof(T));
+            }
         }
     }
 }

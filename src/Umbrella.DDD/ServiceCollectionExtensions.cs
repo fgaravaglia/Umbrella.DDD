@@ -72,7 +72,7 @@ namespace Umbrella.DDD
 
             // get assembly
             var assemblyPath = Path.Combine(assemblyFolder, assemblyName);
-            var targetAssembly = Assembly.LoadFrom(assemblyPath);
+            var targetAssembly = Assembly.Load(assemblyPath);
             if (targetAssembly == null)
                 throw new NullReferenceException($"Unable to load {assemblyName}");
 
@@ -97,7 +97,7 @@ namespace Umbrella.DDD
             // extract all Ihandler<> 
             var resolvers = targetAssembly.GetTypes().Where(x =>
             {
-                return x.GetInterfaces().Count(i => i.IsAssignableFrom(typeof(IDependencyResolver))) > 0;
+                return x.GetInterfaces().Any(i => i.IsAssignableFrom(typeof(IDependencyResolver)));
             }).ToList();
             // instance all types and fill services
             foreach (var resolverType in resolvers)
