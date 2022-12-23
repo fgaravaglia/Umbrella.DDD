@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<LangVersion>10.0</LangVersion>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<PackageId>Umbrella.DDD.GCP</PackageId>
+		<Version>0.1.0.0</Version>
+		<VersionNumber>0.1.0.0</VersionNumber>
+		<Company>Innova Solutions</Company>
+		<Authors>FG</Authors>
+		<Description>&gt;Library to implement GCP concrete component defined from Umbrella.DDD library</Description>
+		<Copyright>FG 2022 - 2023</Copyright>
+		<PackageProjectUrl>https://github.com/fgaravaglia/Umbrella.DDD</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/fgaravaglia/Umbrella.DDD</RepositoryUrl>
+		<icon>umbrella_framework_icon.png</icon>
+		<PackageReleaseNotes>
+		</PackageReleaseNotes>
+	</PropertyGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="Google.Cloud.PubSub.V1" Version="3.2.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Umbrella.DDD\Umbrella.DDD.csproj" />
+	</ItemGroup>
+</Project>
