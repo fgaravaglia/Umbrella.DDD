@@ -67,7 +67,7 @@ namespace Umbrella.DDD.Abstractions.LongRunningProcesses
         /// </summary>
         public void PersistStatus()
         {
-            if (Status == null)
+            if (InternalStatus == null)
                 throw new NullReferenceException($"Unexpecetd NUll status for Saga {this.Id} - {this.Name}");
             this._Repository.Save(this.InternalStatus);
         }

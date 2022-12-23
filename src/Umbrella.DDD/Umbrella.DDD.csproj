@@ -27,7 +27,7 @@
   <ItemGroup>
     <PackageReference Include="microsoft.extensions.configuration" Version="6.0.1" />
     <PackageReference Include="microsoft.extensions.configuration.Binder" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
     <PackageReference Include="System.Text.Json" Version="7.0.0" />
   </ItemGroup>
