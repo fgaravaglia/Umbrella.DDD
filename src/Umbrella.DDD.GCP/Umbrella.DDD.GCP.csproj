@@ -25,7 +25,11 @@
 		<PackageReleaseNotes>
 		</PackageReleaseNotes>
 	</PropertyGroup>
-
+	<ItemGroup>
+		<None Include="..\..\README.md" Pack="true" PackagePath="" />
+		<None Include="..\..\LICENSE" Pack="true" PackagePath="" />
+		<None Include="..\..\images\umbrella_framework_icon.png" Pack="true" PackagePath="" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Google.Cloud.PubSub.V1" Version="3.2.0" />

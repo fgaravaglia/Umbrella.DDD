@@ -89,7 +89,7 @@ namespace Umbrella.DDD.GCP
 
             this._Logger.LogDebug("Message converted into PubSub Format");
             var response = this._Publisher.Publish(topicName, new[] { pubSubMessage });
-            var messageId = response.MessageIds.Select(x => x).ToList().First();
+            var messageId = response.MessageIds.Select(x => x).First();
             this._Logger.LogInformation("Message succesfully published with Id '{messageId}'", messageId);
 
             return messageId;
