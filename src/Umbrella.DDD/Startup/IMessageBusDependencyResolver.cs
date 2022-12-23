@@ -5,7 +5,7 @@ namespace Umbrella.DDD.Startup
     /// <summary>
     /// Abstraction for behavior to Configure services collection with dependencies
     /// </summary>
-    public interface IDependencyResolver
+    public interface IMessageBusDependencyResolver
     {
         /// <summary>
         /// Sets the services provided by the cussrent assembl7 / module / component

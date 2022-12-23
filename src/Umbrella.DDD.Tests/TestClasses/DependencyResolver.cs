@@ -9,7 +9,7 @@ using Umbrella.DDD.Startup;
 
 namespace Umbrella.DDD.Tests.TestClasses
 {
-    internal class DependencyResolver : IDependencyResolver
+    internal class DependencyResolver : IMessageBusDependencyResolver
     {
         public void AddEventHandlers(IServiceCollection services)
         {

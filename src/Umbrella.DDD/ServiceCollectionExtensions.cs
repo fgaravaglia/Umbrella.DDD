@@ -97,12 +97,12 @@ namespace Umbrella.DDD
             // extract all Ihandler<> 
             var resolvers = targetAssembly.GetTypes().Where(x =>
             {
-                return x.GetInterfaces().Any(i => i.IsAssignableFrom(typeof(IDependencyResolver)));
+                return x.GetInterfaces().Any(i => i.IsAssignableFrom(typeof(IMessageBusDependencyResolver)));
             }).ToList();
             // instance all types and fill services
             foreach (var resolverType in resolvers)
             {
-                IDependencyResolver res = (IDependencyResolver)Activator.CreateInstance(resolverType);
+                IMessageBusDependencyResolver res = (IMessageBusDependencyResolver)Activator.CreateInstance(resolverType);
                 if(addMessagehandlers)
                     res.AddEventHandlers(services);
                 if(addLongRunningProcesses)
