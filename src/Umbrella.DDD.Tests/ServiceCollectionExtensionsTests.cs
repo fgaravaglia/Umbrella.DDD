@@ -10,7 +10,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Umbrella.DDD.Abstractions;
-using Umbrella.DDD.GCP;
+using Umbrella.DDD.Tests.TestClasses;
+using TestMessage = Umbrella.DDD.Tests.TestClasses.TestMessage;
 
 namespace Umbrella.DDD.Tests
 {
@@ -127,17 +128,17 @@ namespace Umbrella.DDD.Tests
 
         #endregion
 
-        #region Tests on AddEventHandlersAndLRP - Handlers
+        #region Tests on AddEventHandlers
 
         [Test]
-        public void AddEventHandlersAndLRP_ThrowsErrorIfServicesIsNull()
+        public void AddEventHandlers_ThrowsErrorIfServicesIsNull()
         {
             //********* GIVEN
             IServiceCollection services = null;
             string folder = Environment.CurrentDirectory;
 
             //********* WHEN
-            TestDelegate testCode = () => services.AddEventHandlersAndLRP(folder, "Umbrella.DDD.Tests.dll", true, false);
+            TestDelegate testCode = () => services.AddEventHandlers(folder, "Umbrella.DDD.Tests.dll");
 
             //********* WHEN
             var ex = Assert.Throws<ArgumentNullException>(testCode);
@@ -146,14 +147,14 @@ namespace Umbrella.DDD.Tests
         }
 
         [Test]
-        public void AddEventHandlersAndLRP_ThrowsErrorIfFolderIsNull()
+        public void AddEventHandlers_ThrowsErrorIfFolderIsNull()
         {
             //********* GIVEN
             IServiceCollection services = new ServiceCollection();
             string folder = "";
 
             //********* WHEN
-            TestDelegate testCode = () => services.AddEventHandlersAndLRP(folder, "Umbrella.DDD.Tests.dll", true, false);
+            TestDelegate testCode = () => services.AddEventHandlers(folder, "Umbrella.DDD.Tests.dll");
 
             //********* WHEN
             var ex = Assert.Throws<ArgumentNullException>(testCode);
@@ -162,14 +163,14 @@ namespace Umbrella.DDD.Tests
         }
 
         [Test]
-        public void AddEventHandlersAndLRP_ThrowsErrorIfAssemblynameIsNull()
+        public void AddEventHandlers_ThrowsErrorIfAssemblynameIsNull()
         {
             //********* GIVEN
             IServiceCollection services = new ServiceCollection();
             string folder = Environment.CurrentDirectory;
 
             //********* WHEN
-            TestDelegate testCode = () => services.AddEventHandlersAndLRP(folder, null, true, false);
+            TestDelegate testCode = () => services.AddEventHandlers(folder, null);
 
             //********* WHEN
             var ex = Assert.Throws<ArgumentNullException>(testCode);
@@ -179,14 +180,14 @@ namespace Umbrella.DDD.Tests
 
 
         [Test]
-        public void AddEventHandlersAndLRP_ThrowsErrorIfAssemblyDoesNotExist()
+        public void AddEventHandlers_ThrowsErrorIfAssemblyDoesNotExist()
         {
             //********* GIVEN
             IServiceCollection services = new ServiceCollection();
             string folder = Environment.CurrentDirectory;
 
             //********* WHEN
-            TestDelegate testCode = () => services.AddEventHandlersAndLRP(folder, "Not.existing.Assembly.dll", true, false);
+            TestDelegate testCode = () => services.AddEventHandlers(folder, "Not.existing.Assembly.dll");
 
             //********* WHEN
             var ex = Assert.Throws<FileNotFoundException>(testCode);
@@ -194,7 +195,7 @@ namespace Umbrella.DDD.Tests
         }
 
         [Test]
-        public void AddEventHandlersAndLRPs_InjectsAllHandlers()
+        public void AddEventHandlers_InjectsAllHandlers()
         {
             //********* GIVEN
             IServiceCollection services = new ServiceCollection();
@@ -202,29 +203,26 @@ namespace Umbrella.DDD.Tests
             string folder = Environment.CurrentDirectory;
 
             //********* WHEN
-            services.AddEventHandlersAndLRP(folder, "Umbrella.DDD.Tests.dll", true, false);
+            services.AddEventHandlers(new DependencyResolver());
 
             //********* WHEN
             var provider = services.BuildServiceProvider();
-            var handlers = provider.GetServices<IMessageHandler<Umbrella.DDD.Tests.TestClasses.TestMessage>>();
+            var handlers = provider.GetServices(typeof(IMessageHandler<TestMessage>));
             Assert.That(handlers.Count(), Is.EqualTo(2));
             Assert.Pass();
         }
 
-        #endregion
-
-        #region Tests on AddEventHandlersAndLRP - Saga
-
         [Test]
-        public void AddEventHandlersAndLRP_InjectsAllSaga()
+        public void AddEventHandlers_InjectsAllSaga()
         {
             //********* GIVEN
             IServiceCollection services = new ServiceCollection();
             services.AddSingleton<ILogger>(x => new Mock<ILogger>().Object);
+            services.AddSingleton<IRepository<Saga1Status>>(x => new Mock<IRepository<Saga1Status>>().Object);
             string folder = Environment.CurrentDirectory;
 
             //********* WHEN
-            services.AddEventHandlersAndLRP(folder, "Umbrella.DDD.Tests.dll", false, true);
+            services.AddEventHandlers(new DependencyResolver());
 
             //********* WHEN
             var provider = services.BuildServiceProvider();

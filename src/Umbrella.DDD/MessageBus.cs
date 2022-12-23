@@ -94,6 +94,16 @@ namespace Umbrella.DDD
                 if (saga.Status.IsRunning)
                 {
                     // continue the saga
+                    IMessageHandler<T>? handler = saga as IMessageHandler<T>;
+                    if(handler != null)
+                    {
+                        var ex = handler.TryHandleThisMessage(msg);
+                        if(ex != null)
+                            this._Logger.LogError(ex, "Saga {sagaId} Failed!", saga.Id);
+                    }
+                    else
+                        this._Logger.LogWarning("Saga {sagaId} [{sagaType}] cannot handle messages of type {messageType}",
+                                                saga.Id, saga.GetType(), typeof(T));
                 }
                 else if (!saga.Status.IsCompleted)
                 {

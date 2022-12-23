@@ -20,7 +20,6 @@ namespace Umbrella.DDD.Tests
     public class MessageBusTests
     {
         IMessageBus _Bus;
-        Saga1Status _Saga1Status;
         List<Saga1Status> _Saga1StatusList;
 
         IRepository<Saga1Status> MockStatusRepo()
@@ -43,7 +42,6 @@ namespace Umbrella.DDD.Tests
         [SetUp]
         public void Setup()
         {
-            this._Saga1Status = null;
             this._Saga1StatusList = new List<Saga1Status>();
         }
 
@@ -150,19 +148,19 @@ namespace Umbrella.DDD.Tests
             services.AddTransient<ISaga, Saga1>();
             IServiceProvider provider = services.BuildServiceProvider();
             this._Bus = new MessageBus(logger, publisher.Object, provider);
-            Assert.IsNull(this._Saga1Status, "Precondition: SAGA not started (status null) failed");
+            Assert.That(this._Saga1StatusList.Count, Is.EqualTo(0), "Precondition: SAGA not started (status null) failed");
 
             //********* WHEN
             string msgId = this._Bus.PublishEvent(new TestMessage("SSSSS"));
 
             //********* WHEN
             Assert.False(String.IsNullOrEmpty(msgId));
-            Assert.IsNotNull(this._Saga1Status, "Saga didn't started!");
-            Assert.That(this._Saga1Status.Message, Is.EqualTo("SSSSS"));
-            Assert.That(this._Saga1Status.SagaName, Is.EqualTo("Test1"));
-            Assert.That(this._Saga1Status.SagaId, Is.Not.EqualTo(Guid.Empty.ToString()));
-            Assert.True(this._Saga1Status.IsRunning, "Sage is not running!");
-            Assert.False(this._Saga1Status.IsCompleted);
+            Assert.That(this._Saga1StatusList.Count, Is.EqualTo(1), "Saga didn't started!");
+            Assert.That(this._Saga1StatusList[0].Message, Is.EqualTo("SSSSS"));
+            Assert.That(this._Saga1StatusList[0].SagaName, Is.EqualTo("Test1"));
+            Assert.That(this._Saga1StatusList[0].SagaId, Is.Not.EqualTo(Guid.Empty.ToString()));
+            Assert.True(this._Saga1StatusList[0].IsRunning, "Sage is not running!");
+            Assert.False(this._Saga1StatusList[0].IsCompleted);
             Assert.Pass();
         }
 
@@ -179,7 +177,7 @@ namespace Umbrella.DDD.Tests
             services.AddTransient<ISaga, Saga2>();
             IServiceProvider provider = services.BuildServiceProvider();
             this._Bus = new MessageBus(logger, publisher.Object, provider);
-            Assert.IsNull(this._Saga1Status, "Precondition: SAGA not started (status null) failed");
+            Assert.That(this._Saga1StatusList.Count, Is.EqualTo(0), "Precondition: SAGA not started (status null) failed");
 
             //********* WHEN
             string msgId = this._Bus.PublishEvent(new TestMessage("SSSSS"));
@@ -199,10 +197,10 @@ namespace Umbrella.DDD.Tests
             publisher.Setup(x => x.PublishEvent<TestMessage>(It.IsAny<TestMessage>())).Returns(Guid.NewGuid().ToString());
             var services = new ServiceCollection();
             services.AddSingleton<IRepository<Saga1Status>>(MockStatusRepo());
-            services.AddTransient<ISaga, Saga3>();
+            services.AddSingleton<ISaga, Saga3>();
             IServiceProvider provider = services.BuildServiceProvider();
             this._Bus = new MessageBus(logger, publisher.Object, provider);
-            Assert.IsNull(this._Saga1Status, "Precondition: SAGA not started (status null) failed");
+            Assert.That(this._Saga1StatusList.Count, Is.EqualTo(0), "Precondition: SAGA not started (status null) failed");
 
             //********* WHEN
             this._Bus.PublishEvent(new TestMessage("SSSSS"));
@@ -211,7 +209,7 @@ namespace Umbrella.DDD.Tests
             //********* WHEN
             Assert.That(this._Saga1StatusList.Count, Is.EqualTo(1));
             Assert.That(this._Saga1StatusList[0].Message, Is.EqualTo("SSSSS"));
-            Assert.That(this._Saga1StatusList[0].SagaName, Is.EqualTo("Test3"));
+            Assert.That(this._Saga1StatusList[0].SagaName, Is.EqualTo("Test1"));
             Assert.That(this._Saga1StatusList[0].SagaId, Is.Not.EqualTo(Guid.Empty.ToString()));
             Assert.False(this._Saga1StatusList[0].IsRunning);
             Assert.True(this._Saga1StatusList[0].IsCompleted);

@@ -11,15 +11,17 @@ namespace Umbrella.DDD.Tests.TestClasses
 {
     internal class DependencyResolver : IMessageBusDependencyResolver
     {
-        public void AddEventHandlers(IServiceCollection services)
+        public IServiceCollection AddEventHandlers(IServiceCollection services)
         {
-            services.AddTransient<IMessageHandler<TestMessage>, TestMessageHandler>();
-            services.AddTransient<IMessageHandler<TestMessage>, NewTestMessageHandler>();
+            services.AddTransient<IMessageHandler<TestMessage>>(x => new TestMessageHandler());
+            services.AddTransient<IMessageHandler<TestMessage>>(x => new NewTestMessageHandler());
+            return services;
         }
 
-        public void AddSagas(IServiceCollection services)
+        public IServiceCollection AddSagas(IServiceCollection services)
         {
-
+            services.AddTransient<ISaga, Saga1>();
+            return services;
         }
     }
 }

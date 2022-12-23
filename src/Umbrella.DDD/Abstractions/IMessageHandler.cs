@@ -16,7 +16,7 @@ namespace Umbrella.DDD.Abstractions
     /// <summary>
     /// Abstraction for handler messages
     /// </summary>
-    public interface IMessageHandler<in T> : IMessageHandler where T : IMessage
+    public interface IMessageHandler<T> : IMessageHandler where T : IMessage
     {
         /// <summary>
         /// verifies if handler manages the current event or not
