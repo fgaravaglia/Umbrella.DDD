@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>10.0</LangVersion>
-    <NoWarn>S1905;CS8603;S3925;S112;S2583</NoWarn>
+    <NoWarn>S1905;CS8603;S3925;S112;S2583;S3246;S3885</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
