@@ -5,7 +5,7 @@
 		<Nullable>enable</Nullable>
 		<TargetFramework>netstandard2.1</TargetFramework>
 		<LangVersion>10.0</LangVersion>
-		<NoWarn>S3925;S112</NoWarn>
+		<NoWarn>S3925;S112;S2583</NoWarn>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -14,7 +14,7 @@
 		<VersionNumber>0.1.0.0</VersionNumber>
 		<Company>Innova Solutions</Company>
 		<Authors>FG</Authors>
-		<Description>&gt;Library to implement GCP concrete component defined from Umbrella.DDD library</Description>
+		<Description>Library to implement GCP concrete component defined from Umbrella.DDD library</Description>
 		<Copyright>FG 2022 - 2023</Copyright>
 		<PackageProjectUrl>https://github.com/fgaravaglia/Umbrella.DDD</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
