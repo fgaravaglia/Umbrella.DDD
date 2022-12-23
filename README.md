@@ -16,8 +16,14 @@ dotnet add package Umbrella.DDD
 dotnet add package Umbrella.DDD.GCP
 ```
 
-[![Nuget](https://img.shields.io/nuget/v/Umbrella.Infrastructure.Cache.svg?style=plastic)](https://www.nuget.org/packages/Umbrella.DDD/)
-[![NuGet Downloads](https://img.shields.io/nuget/dt/Umbrella.Infrastructure.Cache.svg)](https://www.nuget.org/packages/Umbrella.DDD/)
+Umbrella.DDD:
+[![Nuget](https://img.shields.io/nuget/v/Umbrella.DDD.svg?style=plastic)](https://www.nuget.org/packages/Umbrella.DDD/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/Umbrella.DDD.svg)](https://www.nuget.org/packages/Umbrella.DDD/)
+
+Umbrella.DDD.GCP:
+[![Nuget](https://img.shields.io/nuget/v/Umbrella.DDD.GCP.svg?style=plastic)](https://www.nuget.org/packages/Umbrella.DDD.GCP/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/Umbrella.DDD.GCP.svg)](https://www.nuget.org/packages/Umbrella.DDD.GCP/)
+
 
 For more details about download, see [NuGet Web Site](https://www.nuget.org/packages/Umbrella.DDD/)
 
