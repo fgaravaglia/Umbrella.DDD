@@ -2,8 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-     <Nullable>enable</Nullable>
-	 <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <LangVersion>10.0</LangVersion>
+    <NoWarn>S1905;CS8603;S3925;S112;S2583</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
