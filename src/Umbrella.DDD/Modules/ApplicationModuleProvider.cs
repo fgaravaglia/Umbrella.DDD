@@ -13,10 +13,18 @@ namespace Umbrella.DDD.Modules
     [ExcludeFromCodeCoverage]
     public abstract class ApplicationModuleProvider : IApplicationModuleProvider
     {
+        #region Fields
         protected readonly IConfiguration _Config;
         protected readonly string _Environment;
+        #endregion
+        
 
-        public ApplicationModuleProvider(IConfiguration config, string environmentName)
+        /// <summary>
+        /// Default COnstr
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="environmentName"></param>
+        protected ApplicationModuleProvider(IConfiguration config, string environmentName)
         {
             this._Config = config ?? throw new ArgumentNullException(nameof(config));
             this._Environment = environmentName;
