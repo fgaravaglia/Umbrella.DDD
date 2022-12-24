@@ -38,15 +38,20 @@ namespace Umbrella.DDD.Abstractions.Domains
         /// mark the changes as committed, to reset entity status
         /// </summary>
         void ChangesCommitted();
+    }
+
+    public interface IEntity<Tdto> : IEntity
+        where Tdto : IEntityDto
+    {
         /// <summary>
         /// Restores the entity status from DTO
         /// </summary>
         /// <param name="dto"></param>
-        void SetStatusFromDTO(object dto);
+        void SetStatusFromDTO(Tdto dto);
         /// <summary>
         /// converts the entity ro DTO obj
         /// </summary>
         /// <param name="dto"></param>
-        object ToDTO();
+        Tdto ToDTO();
     }
 }

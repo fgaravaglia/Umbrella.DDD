@@ -11,8 +11,8 @@ namespace Umbrella.DDD.Domain.Persistence
     /// <typeparam name="T">type of Business Entity</typeparam>
     /// <typeparam name="Tdto">type of DTO taht maps the entity</typeparam>
     public abstract class JsonEntityRepository<T, Tdto> : IEntityRepository<T>
-        where T : IEntity
-        where Tdto : class
+        where T : IEntity<Tdto>
+        where Tdto : class, IEntityDto
     {
         #region Fields
         readonly string _StorageFolder;
