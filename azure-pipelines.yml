@@ -2,7 +2,8 @@ trigger:
   branches:
     include:
       - main
-      - development
+      - release-*
+      - feature/*
     # exclude:
     #   - release-candidate
     #   - release-1.0
