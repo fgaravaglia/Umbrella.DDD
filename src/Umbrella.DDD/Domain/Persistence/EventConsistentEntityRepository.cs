@@ -13,9 +13,8 @@ namespace Umbrella.DDD.Domain.Persistence
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <typeparam name="Tdto"></typeparam>
-    public class EventConsistentEntityRepository<T, Tdto> : IEntityRepository<T>
+    public class EventConsistentEntityRepository<T> : IEntityRepository<T>
         where T : IEntity
-        where Tdto : class
     {
         #region protected methods
         readonly protected IEntityRepository<T> _Repository;
