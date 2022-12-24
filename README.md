@@ -27,7 +27,8 @@ Umbrella.DDD.GCP:
 
 For more details about download, see [NuGet Web Site](https://www.nuget.org/packages/Umbrella.DDD/)
 
-# Configuration
+## Configuration
+
 to configure properly the application, it's necessary to add the section to ppSettings.json file as the example below:
 
 ```json
@@ -39,9 +40,11 @@ to configure properly the application, it's necessary to add the section to ppSe
 ```
 
 where we have:
+
 - PublisherName: name of the provider for the publisher component. Valid names: [InMemory,PubSub]
 
-# Usage
+## Usage
+
 for the usage of the library, please refer to extension methods.
 
 <b>Standard usage</b>
@@ -71,3 +74,15 @@ services.AddMessageBus();
 
 Using PubSub publisher, you are decoupling the publish action to handler action.
 the message will be handled asyncronously.
+
+## Application Modules
+to simplify the aggregation of assemblies into MOdules (or generically speaking _Domains_), _IApplicationModuleProvider_ is provided.
+implementig such interface per Domain, you can easily setup your dependencies across domain assemly, infrastructure, ecc.
+Here you find a simple snippet:
+
+```c#
+
+services.AddApplicationModules(new MyApplicationModuleProvider())
+
+```
+
