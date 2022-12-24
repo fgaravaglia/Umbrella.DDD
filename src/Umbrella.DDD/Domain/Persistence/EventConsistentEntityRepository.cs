@@ -61,7 +61,8 @@ namespace Umbrella.DDD.Domain.Persistence
                 }
                 catch(Exception ex)
                 {
-                    this._Logger.LogError(ex);
+                    this._Logger.LogError(ex, "unexpected error publishing event {eventId} - {eventType} after saving entity {entityId}",
+                                                msg.ID, msg.GetType(), entity.ID);
                 }
            }
         }
