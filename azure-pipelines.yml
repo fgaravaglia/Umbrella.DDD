@@ -31,7 +31,7 @@ parameters:
     default: 9
   - name: PatchVersion
     displayName: "Patch Version"
-    default: 1
+    default: 2
   - name: authors
     displayName: "Names of authors of the target package"
     default: "FG"

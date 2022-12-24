@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Umbrella.DDD.Abstractions;
-using Umbrella.DDD.Startup;
+using Umbrella.DDD.DependencyInjection;
 
 namespace Umbrella.DDD
 {

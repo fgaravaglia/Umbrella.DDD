@@ -49,14 +49,14 @@ for the usage of the library, please refer to extension methods.
 ```c#
 
 services.AddInMemoryEventPublisher();
-services.AddEventHanders(Environment.CurrentDirectory, "MyTestAssembly.dll");
+services.AddEventHanders(new MyMessageBusDependencyResolver());
 services.AddMessageBus();
 
 ```
 
 Based on the snippet, some important notice:
 - _AddInMemoryEventPublisher_: it should be avoided for PROD environments
-- _AddEventHanders_: it scans the assembly to inject dynamically IMEssageHandler component 
+- _AddEventHanders_: it scans the assembly to inject dynamically IMessageHandler and ISaga components
 - instruction _AddMessageBus_ should be states after all DI injections
 
 <b>Publishing message on Google Pub Sub</b>
@@ -64,7 +64,7 @@ Based on the snippet, some important notice:
 ```c#
 
 services.AddPubSubEventPublisher("umbrella-proj-id");
-services.AddEventHanders(Environment.CurrentDirectory, "MyTestAssembly.dll");
+services.AddEventHanders(new MyMessageBusDependencyResolver());
 services.AddMessageBus();
 
 ```

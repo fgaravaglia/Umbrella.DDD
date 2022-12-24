@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Umbrella.DDD.Startup
+namespace Umbrella.DDD.DependencyInjection
 {
     /// <summary>
     /// Abstraction for behavior to Configure services collection with dependencies

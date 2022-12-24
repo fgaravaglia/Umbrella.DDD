@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Umbrella.DDD.Abstractions;
-using Umbrella.DDD.Startup;
+using Umbrella.DDD.DependencyInjection;
 
 namespace Umbrella.DDD.Tests.TestClasses
 {
