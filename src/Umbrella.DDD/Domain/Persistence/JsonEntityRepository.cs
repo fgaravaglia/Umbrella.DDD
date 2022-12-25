@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using Umbrella.DDD.Abstractions.Domains;
 
 namespace Umbrella.DDD.Domain.Persistence
 {
     /// <summary>
-    /// Base implementation for Domain Entity repository, where persistence is on filesystem through json files
+    /// Base implementation for Domain Entity repository, where persistence is on filesystem through json files, one per entity Type
     /// </summary>
     /// <typeparam name="T">type of Business Entity</typeparam>
     /// <typeparam name="Tdto">type of DTO taht maps the entity</typeparam>
@@ -16,7 +18,8 @@ namespace Umbrella.DDD.Domain.Persistence
     {
         #region Fields
         readonly string _StorageFolder;
-        readonly string _FilenameBase;
+        readonly string _Filename;
+        readonly JsonSerializerOptions _JsonOptions;
         readonly object _Locker = new object();
         #endregion
 
@@ -34,7 +37,12 @@ namespace Umbrella.DDD.Domain.Persistence
                 throw new ArgumentNullException(nameof(filename));
 
             _StorageFolder = path;
-            _FilenameBase = filename;
+            _Filename = filename;
+            _JsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
         }
 
         /// <summary>
@@ -44,21 +52,25 @@ namespace Umbrella.DDD.Domain.Persistence
         /// <returns></returns>
         public T? Get(string id)
         {
-            if (string.IsNullOrEmpty(id))
-                throw new ArgumentNullException(nameof(id));
-
+            return this.GetAll().SingleOrDefault(x => x.ID.Equals(id, StringComparison.InvariantCultureIgnoreCase));
+        }
+        /// <summary>
+        /// Gets the entire colelctions of entities
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<T> GetAll()
+        {
+            var entities = new List<T>();
             // set the filename
-            var fullPath = Path.Combine(_StorageFolder, $"{_FilenameBase}-{id}.json");
-
+            var fullPath = Path.Combine(_StorageFolder, _Filename);
             // remove old version
             if (!File.Exists(fullPath))
-                return default(T);
-
+                return entities;
             // read json
             var jsonString = File.ReadAllText(fullPath);
             //convert back
-            var dto = ToDto(jsonString);
-            return InstanceEntity(dto);
+            var dtos = ToDtoList(jsonString);
+            return dtos.Select(x => InstanceEntity(x));
         }
         /// <summary>
         /// Persist the status of entity
@@ -66,22 +78,34 @@ namespace Umbrella.DDD.Domain.Persistence
         /// <param name="entity"></param>
         public void Save(T entity)
         {
-            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            //gets the list
+            var entities = GetAll().ToList();
+
+            // add or update
+            var existing = entities.SingleOrDefault(x => x.ID.Equals(entity.ID, StringComparison.InvariantCultureIgnoreCase));
+            if (existing != null)
+            {
+                var index = entities.IndexOf(existing);
+                entities.RemoveAt(index);
+            }
+            entities.Add(entity);
 
             // convert to json
-            var dto = (Tdto)entity.ToDTO();
-            var jsonString = ToJson(dto);
+            var dtos = entities.Select(x => x.ToDTO()).ToList();
+            var jsonString = JsonSerializer.Serialize<IEnumerable<Tdto>>(dtos, this._JsonOptions);
 
             // set the filename
-            var fullPath = Path.Combine(_StorageFolder, $"{_FilenameBase}-{entity.ID}.json");
-
-            // remove old version
-            if (File.Exists(fullPath))
-                File.Delete(fullPath);
+            var fullPath = Path.Combine(_StorageFolder, _Filename);
 
             // persists the data
             lock (_Locker)
             {
+                // remove old version
+                if (File.Exists(fullPath))
+                    File.Delete(fullPath);
                 File.WriteAllText(fullPath, jsonString);
             }
         }
@@ -90,31 +114,12 @@ namespace Umbrella.DDD.Domain.Persistence
 
         protected abstract T InstanceEntity(Tdto dto);
 
-        protected virtual string ToJson(Tdto dto)
+        protected virtual IEnumerable<Tdto> ToDtoList(string json)
         {
-
-            var options = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
-            };
-
-            return JsonSerializer.Serialize<Tdto>(dto, options);
-        }
-
-        protected virtual Tdto ToDto(string json)
-        {
-
-            var options = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
-            };
-
-           var dto = JsonSerializer.Deserialize<Tdto>(json, options);
-            if (dto == null)
-                throw new NullReferenceException("Unexpected null DTO");
-            return dto;
+            var dtos = JsonSerializer.Deserialize<IEnumerable<Tdto>>(json, this._JsonOptions);
+            if (dtos == null)
+                throw new NullReferenceException("Unexpected null DTO list");
+            return dtos;
         }
 
         #endregion
