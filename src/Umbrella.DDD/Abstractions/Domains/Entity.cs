@@ -93,6 +93,8 @@ namespace Umbrella.DDD.Abstractions.Domains
         /// <param name="dto"></param>
         public virtual void SetStatusFromDTO(Tdto dto)
         {
+            if(dto == null)
+                throw new ArgumentNullException(nameof(dto));
             this._PlainStatus = dto;
             this.ID = dto.ID;
             this.CreatedOn = dto.CreatedOn;

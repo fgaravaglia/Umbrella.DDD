@@ -37,7 +37,7 @@ namespace Umbrella.DDD.Domain.Persistence
                 throw new ArgumentNullException(nameof(filename));
 
             _StorageFolder = path;
-            _Filename = filename;
+            _Filename = filename.ToLowerInvariant().EndsWith(".json") ? filename : filename + ".json";
             _JsonOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
