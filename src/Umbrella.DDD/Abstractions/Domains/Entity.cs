@@ -7,13 +7,19 @@ namespace Umbrella.DDD.Abstractions.Domains
     /// <summary>
     /// base implementation of Business domain entity
     /// </summary>
-    public abstract class Entity : IEntity
+    public abstract class Entity<Tdto> : IEntity<Tdto>
+        where Tdto : IEntityDto
     {
         #region Attributes
         /// <summary>
         /// List of event not already eprsisted
         /// </summary>
         protected readonly List<IMessage> _UncommittedEvents;
+        /// <summary>
+        /// Representation of status of given entity by its DTO
+        /// </summary>
+        /// <value></value>
+        protected Tdto? _PlainStatus;
         #endregion
 
         #region  Properties
@@ -37,6 +43,7 @@ namespace Umbrella.DDD.Abstractions.Domains
         /// </summary>
         /// <value></value>
         public bool HasChanged { get { return GetUncommittedChanges().Any(); } }
+
         #endregion
 
         /// <summary>
@@ -53,6 +60,7 @@ namespace Umbrella.DDD.Abstractions.Domains
             CreatedOn = DateTime.Now;
             LastUpdatedOn = null;
             _UncommittedEvents = new List<IMessage>();
+            this._PlainStatus = default(Tdto);
         }
 
         /// <summary>
@@ -83,11 +91,20 @@ namespace Umbrella.DDD.Abstractions.Domains
         /// Restores the entity status from DTO
         /// </summary>
         /// <param name="dto"></param>
-        public abstract void SetStatusFromDTO(object dto);
+        public virtual void SetStatusFromDTO(Tdto dto)
+        {
+            this._PlainStatus = dto;
+            this.ID = dto.ID;
+            this.CreatedOn = dto.CreatedOn;
+            this.LastUpdatedOn = dto.LastUpdatedOn;
+        }
         /// <summary>
         /// converts the entity ro DTO obj
         /// </summary>
         /// <param name="dto"></param>
-        public abstract object ToDTO();
+        public virtual Tdto ToDTO()
+        {
+            return this._PlainStatus;
+        }
     }
 }

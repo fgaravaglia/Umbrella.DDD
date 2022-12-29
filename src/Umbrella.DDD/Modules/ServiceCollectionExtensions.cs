@@ -31,12 +31,12 @@ namespace Umbrella.DDD.Modules
         /// </summary>
         /// <param name="services"></param>
         /// <param name="providerFactory">lamda function to instance the provider of type <see href="IApplicationModuleProvider" ></see></param>
-        public static void AddApplicationModules(this IServiceCollection services, Func<IApplicationModuleProvider> providerFactory)
+        public static void AddApplicationModules(this IServiceCollection services, Func<IServiceCollection, IApplicationModuleProvider> providerFactory)
         {
             if (providerFactory is null)
                 throw new ArgumentNullException(nameof(providerFactory));
 
-            providerFactory.Invoke().GetModules().ToList().ForEach(m => m.AddServices(services));
+            providerFactory.Invoke(services).GetModules().ToList().ForEach(m => m.AddServices(services));
         }
 
     }

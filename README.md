@@ -2,6 +2,7 @@
 Library to implement a light-weight Framework for Domain Driven Design
 
 [![Build Status](https://garaproject.visualstudio.com/UmbrellaFramework/_apis/build/status/Umbrella.DDD?branchName=main)](https://garaproject.visualstudio.com/UmbrellaFramework/_build/latest?definitionId=80&branchName=main)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Umbrella.DDD&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Umbrella.DDD)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Umbrella.DDD&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Umbrella.DDD)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Umbrella.DDD&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Umbrella.DDD)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Umbrella.DDD&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Umbrella.DDD)
