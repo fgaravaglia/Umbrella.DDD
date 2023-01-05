@@ -76,7 +76,7 @@ namespace Umbrella.DDD.Abstractions.LongRunningProcesses
         /// </summary>
         public void RefreshStatus()
         {
-            var status = this._Repository.Get(this.Id);
+            var status = this._Repository.GetById(this.Id);
             if (status != null)
                 this.InternalStatus = status;
         }

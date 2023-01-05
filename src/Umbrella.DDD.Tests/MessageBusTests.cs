@@ -35,7 +35,7 @@ namespace Umbrella.DDD.Tests
                 existing.IsRunning = x.IsRunning;
                 existing.IsCompleted = x.IsCompleted;
             });
-            repo.Setup(x => x.Get(It.IsAny<string>())).Returns<string>(x => this._Saga1StatusList.SingleOrDefault(s => s.SagaId == x));
+            repo.Setup(x => x.GetById(It.IsAny<string>())).Returns<string>(x => this._Saga1StatusList.SingleOrDefault(s => s.SagaId == x));
             return repo.Object;
         }
 

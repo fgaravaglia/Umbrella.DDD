@@ -32,7 +32,7 @@ parameters:
     default: 0
   - name: PatchVersion
     displayName: "Patch Version"
-    default: 1
+    default: 2
   - name: authors
     displayName: "Names of authors of the target package"
     default: "FG"
@@ -116,6 +116,7 @@ stages:
 
   - stage: PackAndPush
     dependsOn: Build
+    condition: in(dependencies.Build.result, 'Succeeded', 'SucceededWithIssues')
     jobs:
       - job: NugetPush
         steps:
