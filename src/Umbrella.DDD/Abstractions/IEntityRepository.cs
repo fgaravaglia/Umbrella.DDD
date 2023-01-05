@@ -1,6 +1,5 @@
 namespace Umbrella.DDD.Abstractions
 {
-
     /// <summary>
     /// Abstranction for repository of given class
     /// </summary>
@@ -12,11 +11,13 @@ namespace Umbrella.DDD.Abstractions
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        T? Get(string id);
+        T? GetById(string id);
+
         /// <summary>
         /// Persist the status of entity
         /// </summary>
         /// <param name="entity"></param>
-        void Save(T entity);
+        /// <returns>ID of entity</returns>
+        string Save(T entity);
     }
 }

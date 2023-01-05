@@ -42,7 +42,7 @@ namespace Umbrella.DDD.Domain.Persistence
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public T? Get(string id)
+        public T? GetById(string id)
         {
             if (string.IsNullOrEmpty(id))
                 throw new ArgumentNullException(nameof(id));
@@ -64,7 +64,7 @@ namespace Umbrella.DDD.Domain.Persistence
         /// Persist the status of entity
         /// </summary>
         /// <param name="entity"></param>
-        public void Save(T entity)
+        public string Save(T entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
@@ -84,6 +84,8 @@ namespace Umbrella.DDD.Domain.Persistence
             {
                 File.WriteAllText(fullPath, jsonString);
             }
+
+            return entity.ID;
         }
 
         #region Protected methods

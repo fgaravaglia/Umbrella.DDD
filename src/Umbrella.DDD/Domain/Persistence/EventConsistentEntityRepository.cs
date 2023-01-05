@@ -38,17 +38,17 @@ namespace Umbrella.DDD.Domain.Persistence
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public T? Get(string id)
+        public T? GetById(string id)
         {
-            return this._Repository.Get(id);
+            return this._Repository.GetById(id);
         }
         /// <summary>
         /// Saves the entity. Since this repository keeps the event consistency, all uncommitted changes are publishes using MessageBus
         /// </summary>
         /// <param name="entity"></param>
-        public void Save(T entity)
+        public string Save(T entity)
         {
-           this._Repository.Save(entity);
+           var entityId = this._Repository.Save(entity);
 
            // gets the uncommitted events
            var events = entity.GetUncommittedChanges();
@@ -64,6 +64,8 @@ namespace Umbrella.DDD.Domain.Persistence
                                                 msg.ID, msg.GetType(), entity.ID);
                 }
            }
+
+           return entityId;
         }
     }
 }
