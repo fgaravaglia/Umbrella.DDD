@@ -39,8 +39,6 @@ namespace Umbrella.DDD
                 var topic = _Topics[targetType];
                 _MessagesPerTopic[topic].Add(msg);
             }
-            else
-                Console.WriteLine("WARN NO topic found for " + targetType);
             return msg.ID;
         }
         /// <summary>

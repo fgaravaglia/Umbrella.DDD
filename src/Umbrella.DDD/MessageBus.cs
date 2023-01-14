@@ -21,13 +21,24 @@ namespace Umbrella.DDD
         readonly ILogger _Logger;
         readonly IEventPublisher _Publisher;
         readonly IServiceProvider _ServiceProvider;
+        readonly bool _EnableInMemoryEventHandlers = true;
         #endregion
 
-        public MessageBus(ILogger logger, IEventPublisher publisher, IServiceProvider serviceProvider)
+        /// <summary>
+        /// Default constr
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="publisher"></param>
+        /// <param name="serviceProvider"></param>
+        /// <param name="enableInMemoryEventHandlers">True if we want to manage in-memory event handlers.
+        /// False to skip them. in this scenario messages are published on queues and processed asyncroously in a different thread or component
+        /// </param>
+        public MessageBus(ILogger logger, IEventPublisher publisher, IServiceProvider serviceProvider, bool enableInMemoryEventHandlers = true)
         {
             this._Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this._Publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
             this._ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            this._EnableInMemoryEventHandlers = enableInMemoryEventHandlers;
         }
 
         /// <summary>
@@ -51,21 +62,24 @@ namespace Umbrella.DDD
                 Type handlerType = typeof(IMessageHandler<>).MakeGenericType(targetMessageType);
                 this._Logger.LogInformation("Resolving handlers of type {handlerType}", handlerType);
 
-                // check if there are any hanldler of this message
-                var handlers = this._ServiceProvider.GetServices(handlerType)
-                                                    .Where(x => (x as IMessageHandler) != null)
-                                                    .Select(x => (IMessageHandler)x)
-                                                    .Where(x => x != null && x.CanHandleThisMessage(msg))
-                                                    .ToList();
-                this._Logger.LogInformation("Found {handlersCount} to handle the message {eventId} of {type}", handlers.Count, msg.ID, targetMessageType);
-                Parallel.ForEach(handlers, x =>
+                if(this._EnableInMemoryEventHandlers)
                 {
-                    if(x != null)
+                    // check if there are any hanldler of this message
+                    var handlers = this._ServiceProvider.GetServices(handlerType)
+                                                        .Where(x => (x as IMessageHandler) != null)
+                                                        .Select(x => (IMessageHandler)x)
+                                                        .Where(x => x != null && x.CanHandleThisMessage(msg))
+                                                        .ToList();
+                    this._Logger.LogInformation("Found {handlersCount} to handle the message {eventId} of {type}", handlers.Count, msg.ID, targetMessageType);
+                    Parallel.ForEach(handlers, x =>
                     {
-                        var index = handlers.IndexOf(x);
-                        RunHandler(x, msg, index);
-                    }
-                });
+                        if(x != null)
+                        {
+                            var index = handlers.IndexOf(x);
+                            RunHandler(x, msg, index);
+                        }
+                    });
+                }
 
                 // Check if saga need to be run
                 var sagas = this._ServiceProvider.GetServices<ISaga>().Where(x => x.CanHandleThisMessage(msg)).ToList();

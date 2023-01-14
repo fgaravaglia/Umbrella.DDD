@@ -162,6 +162,28 @@ namespace Umbrella.DDD.Tests
             Assert.Pass();
         }
 
+        [Test]
+        public void Publish_FromListOfMessages_WithHandlersDisabled_DoesNotInvokesAnyHandler()
+        {
+            //********* GIVEN
+            var services = new ServiceCollection();
+            var handler = new Mock<IMessageHandler<Umbrella.DDD.Tests.TestClasses.TestMessage>>();
+            handler.Setup(x => x.CanHandleThisMessage(It.IsAny<IMessage>())).Returns(true);
+            services.AddSingleton<ILogger>(x => this._Logger.Object);
+            services.AddScoped<IMessageHandler<TestMessage>>(x => handler.Object);
+            IServiceProvider provider = services.BuildServiceProvider();
+            this._Bus = new MessageBus(this._Logger.Object, this._Publisher.Object, provider, enableInMemoryEventHandlers: false);
+            var messages = new List<IMessage>() { new TestMessage("SSSSS") };
+
+            //********* WHEN
+            string msgId = this._Bus.PublishMessage(messages[0]);
+
+            //********* WHEN
+            Assert.False(String.IsNullOrEmpty(msgId));
+            handler.Verify(x => x.TryHandleMessage(It.IsAny<IMessage>()), Times.Never);
+            Assert.Pass();
+        }
+
         #region Tests on Saga Management
 
         [Test]
