@@ -41,38 +41,43 @@ namespace Umbrella.DDD
             if(msg == null)
                 throw new ArgumentNullException(nameof(msg));
 
-            // publis current message
-            this._Logger.LogInformation("Publishing Message {eventMessage}", msg);
-            var msgId = this._Publisher.PublishMessage(msg);
-
-            var targetMessageType = msg.GetType();
-            Type handlerType = typeof(IMessageHandler<>).MakeGenericType(targetMessageType);
-            this._Logger.LogInformation("Resolving handlers of type {handlerType}", handlerType);
-
-            // check if there are any hanldler of this message
-            var handlers = this._ServiceProvider.GetServices(handlerType)
-                                                .Select(x => (IMessageHandler)x)
-                                                .Where(x => x != null && x.CanHandleThisMessage(msg))
-                                                .ToList();
-            this._Logger.LogInformation("Found {handlersCount} to handle the message {eventId} of {type}", handlers.Count, msg.ID, targetMessageType);
-            Parallel.ForEach(handlers, x =>
+            using(this._Logger.BeginScope("MessageContext: {msgId} {msgType}", msg.ID, msg.GetType()))
             {
-                if(x != null)
+                // publis current message
+                this._Logger.LogInformation("Publishing Message {eventMessage}", msg);
+                var msgId = this._Publisher.PublishMessage(msg);
+
+                var targetMessageType = msg.GetType();
+                Type handlerType = typeof(IMessageHandler<>).MakeGenericType(targetMessageType);
+                this._Logger.LogInformation("Resolving handlers of type {handlerType}", handlerType);
+
+                // check if there are any hanldler of this message
+                var handlers = this._ServiceProvider.GetServices(handlerType)
+                                                    .Where(x => (x as IMessageHandler) != null)
+                                                    .Select(x => (IMessageHandler)x)
+                                                    .Where(x => x != null && x.CanHandleThisMessage(msg))
+                                                    .ToList();
+                this._Logger.LogInformation("Found {handlersCount} to handle the message {eventId} of {type}", handlers.Count, msg.ID, targetMessageType);
+                Parallel.ForEach(handlers, x =>
                 {
-                    var index = handlers.IndexOf(x);
-                    RunHandler(x, msg, index);
-                }
-            });
+                    if(x != null)
+                    {
+                        var index = handlers.IndexOf(x);
+                        RunHandler(x, msg, index);
+                    }
+                });
 
-            // Check if saga need to be run
-            var sagas = this._ServiceProvider.GetServices<ISaga>().Where(x => x.CanHandleThisMessage(msg)).ToList();
-            this._Logger.LogInformation("Found {sagaCounter} sagas to verify", sagas.Count);
-            Parallel.ForEach(sagas, x =>
-            {
-                var index = sagas.IndexOf(x);
-                RunSaga(x, msg, index);
-            });
-            return msgId;
+                // Check if saga need to be run
+                var sagas = this._ServiceProvider.GetServices<ISaga>().Where(x => x.CanHandleThisMessage(msg)).ToList();
+                this._Logger.LogInformation("Found {sagaCounter} sagas to verify", sagas.Count);
+                Parallel.ForEach(sagas, x =>
+                {
+                    var index = sagas.IndexOf(x);
+                    RunSaga(x, msg, index);
+                });
+                
+                return msgId;
+            }
         }
         /// <summary>
         /// 
