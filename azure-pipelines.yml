@@ -1,12 +1,11 @@
 trigger:
   branches:
     include:
-      - main
       - release-*
       - feature/*
-    # exclude:
-    #   - release-candidate
-    #   - release-1.0
+    exclude:
+      - main
+
   paths:
     include:
       - src
