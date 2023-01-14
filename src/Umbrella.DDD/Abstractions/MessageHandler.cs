@@ -1,4 +1,5 @@
 using System;
+using Microsoft.Extensions.Logging;
 
 namespace Umbrella.DDD.Abstractions
 {
@@ -8,11 +9,16 @@ namespace Umbrella.DDD.Abstractions
     public abstract class MessageHandler<T> : IMessageHandler<T> where T : IMessage
     {
         /// <summary>
+        /// Logger
+        /// </summary>
+        protected readonly ILogger _Logger;
+        
+        /// <summary>
         /// Empty Constr
         /// </summary>
-        protected MessageHandler()
+        protected MessageHandler(ILogger logger)
         {
-
+            this._Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
         /// <summary>
         /// Checks if current handler can manage the message

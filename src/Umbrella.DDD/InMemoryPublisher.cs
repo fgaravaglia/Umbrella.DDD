@@ -42,6 +42,7 @@ namespace Umbrella.DDD
                 Console.WriteLine("WARN NO topic found for " + typeof(T));
             return msg.ID;
         }
+
         /// <summary>
         /// 
         /// </summary>

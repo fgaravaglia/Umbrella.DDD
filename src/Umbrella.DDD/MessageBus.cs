@@ -43,7 +43,9 @@ namespace Umbrella.DDD
             var msgId = this._Publisher.PublishEvent(msg);
 
             // check if there are any hanldler of this message
-            var handlers = this._ServiceProvider.GetServices<IMessageHandler<T>>().ToList();
+            var handlers = this._ServiceProvider.GetServices<IMessageHandler<IMessage>>()
+                                                .Where(x => x.CanHandleThisMessage(msg))
+                                                .ToList();
             this._Logger.LogInformation("Found {handlersCount} to handle the message {eventId} of {type}", handlers.Count, msg.ID, typeof(T));
             Parallel.ForEach(handlers, x =>
             {
