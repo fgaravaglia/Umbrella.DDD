@@ -12,6 +12,13 @@ namespace Umbrella.DDD.Tests.TestClasses
     {
         public TestMessageHandler(ILogger logger) : base(logger) { }
 
+        public override bool CanHandleThisMessage(IMessage message)
+        {
+            if (message == null)
+                return false;
+            return message.GetType() == typeof(TestMessage);
+        }
+
         public override void HandleThisMessage(TestMessage message)
         { }
 

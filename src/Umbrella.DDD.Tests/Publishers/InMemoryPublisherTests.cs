@@ -60,7 +60,7 @@ namespace Umbrella.DDD.Tests.Publishers
             this._Publisher.UsingThisQueueFor<TestMessage>("queueName");
 
             //********* WHEN
-            TestDelegate testCode = () => this._Publisher.PublishEvent<TestMessage>(msg);
+            TestDelegate testCode = () => this._Publisher.PublishMessage(msg);
 
             //********* WHEN
             ArgumentNullException ex = Assert.Throws<ArgumentNullException>(testCode);

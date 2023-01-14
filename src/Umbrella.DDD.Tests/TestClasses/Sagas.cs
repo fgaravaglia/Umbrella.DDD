@@ -104,16 +104,9 @@ namespace Umbrella.DDD.Tests.TestClasses
             return (message.GetType() == typeof(TestMessage2) || message.GetType() == typeof(TestMessage));
         }
 
-        public void Handle(object message)
-        {
-            this.TryHandleThisMessage((TestMessage2)message);
-        }
-
         public Exception TryHandleThisMessage(TestMessage2 message)
         {
-            this.InternalStatus.IsCompleted = true;
-            this.InternalStatus.IsRunning = false;
-            return null;
+            return TryHandleMessage(message);
         }
 
         protected override void StartSagaFromMessage<T>(T message)
@@ -121,6 +114,18 @@ namespace Umbrella.DDD.Tests.TestClasses
             this.InternalStatus.Message = message.Body.ToString();
             this.InternalStatus.IsCompleted = false;
             this.InternalStatus.IsRunning = true;
+        }
+
+        public void Handle(IMessage message)
+        {
+            this.TryHandleThisMessage((TestMessage2)message);
+        }
+
+        public Exception TryHandleMessage(IMessage message)
+        {
+            this.InternalStatus.IsCompleted = true;
+            this.InternalStatus.IsRunning = false;
+            return null;
         }
     }
 }

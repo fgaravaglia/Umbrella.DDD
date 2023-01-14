@@ -21,28 +21,28 @@ namespace Umbrella.DDD
             _Topics = new Dictionary<Type, string>();
             _MessagesPerTopic = new Dictionary<string, List<IMessage>>();
         }
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="msg"></param>
-        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public string PublishEvent<T>(T msg) where T : IMessage
+        public string PublishMessage(IMessage msg)
         {
             if (msg == null)
                 throw new ArgumentNullException(nameof(msg));
+            var targetType = msg.GetType();
 
             //If key exists, a topic has bee identiefied
-            if (_Topics.ContainsKey(typeof(T)))
+            if (_Topics.ContainsKey(targetType))
             {
-                var topic = _Topics[typeof(T)];
+                var topic = _Topics[targetType];
                 _MessagesPerTopic[topic].Add(msg);
             }
             else
-                Console.WriteLine("WARN NO topic found for " + typeof(T));
+                Console.WriteLine("WARN NO topic found for " + targetType);
             return msg.ID;
         }
-
         /// <summary>
         /// 
         /// </summary>

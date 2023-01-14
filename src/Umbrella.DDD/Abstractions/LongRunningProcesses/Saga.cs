@@ -95,8 +95,9 @@ namespace Umbrella.DDD.Abstractions.LongRunningProcesses
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            if (StarterEventType != typeof(T))
-                throw new ArgumentException($"Expcted starter event of Type {this.StarterEventType.Name} but found {typeof(T).Name} instead");
+            var msgType = message.GetType();
+            if (StarterEventType != msgType)
+                throw new ArgumentException($"Expcted starter event of Type {this.StarterEventType.Name} but found {msgType.Name} instead");
 
             StartSagaFromMessage(message);
         }
