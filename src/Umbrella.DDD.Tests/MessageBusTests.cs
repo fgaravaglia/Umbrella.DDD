@@ -163,6 +163,33 @@ namespace Umbrella.DDD.Tests
         }
 
         [Test]
+        [Description(@"This test has been added to  replicate a bug context (#3).
+        A message from generic list of events does not resolve succesfully the handler")]
+        public void Publish_FromListOfMessages_InvokesExpectedHandler_And_SkipsSaga()
+        {
+            //********* GIVEN
+            var services = new ServiceCollection();
+            var handler = new Mock<IMessageHandler<Umbrella.DDD.Tests.TestClasses.TestMessage>>();
+            handler.Setup(x => x.CanHandleThisMessage(It.IsAny<IMessage>())).Returns(true);
+            services.AddSingleton<ILogger>(x => this._Logger.Object);
+            services.AddScoped<IMessageHandler<TestMessage>>(x => handler.Object);
+            services.AddSingleton<IRepository<Saga1Status>>(this._Repository.Object);
+            services.AddTransient<ISaga, Saga1>();
+            services.AddTransient<ISaga, Saga2>();
+            IServiceProvider provider = services.BuildServiceProvider();
+            this._Bus = new MessageBus(this._Logger.Object, this._Publisher.Object, provider);
+            var messages = new List<IMessage>() { new TestMessage("SSSSS") };
+
+            //********* WHEN
+            string msgId = this._Bus.PublishMessage(messages[0]);
+
+            //********* WHEN
+            Assert.False(String.IsNullOrEmpty(msgId));
+            handler.Verify(x => x.TryHandleMessage(It.IsAny<IMessage>()), Times.Once);
+            Assert.Pass();
+        }
+
+        [Test]
         public void Publish_FromListOfMessages_WithHandlersDisabled_DoesNotInvokesAnyHandler()
         {
             //********* GIVEN

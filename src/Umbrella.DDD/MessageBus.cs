@@ -66,7 +66,16 @@ namespace Umbrella.DDD
                 {
                     // check if there are any hanldler of this message
                     var handlers = this._ServiceProvider.GetServices(handlerType)
-                                                        .Where(x => (x as IMessageHandler) != null)
+                                                        .Where(x => 
+                                                        {
+                                                            if(x == null)
+                                                                return false;
+                                                        
+                                                            // extract only handlers, not Saga
+                                                            IMessageHandler? h = (IMessageHandler)x;
+                                                            ISaga? s = (ISaga)x;
+                                                            return h != null && s == null;
+                                                        })
                                                         .Select(x => (IMessageHandler)x)
                                                         .Where(x => x != null && x.CanHandleThisMessage(msg))
                                                         .ToList();
