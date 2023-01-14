@@ -98,7 +98,10 @@ namespace Umbrella.DDD.Tests.TestClasses
 
         public override bool CanHandleThisMessage(IMessage message)
         {
-            return (message.GetType() == typeof(TestMessage2));
+            if(message == null)
+                return false;
+
+            return (message.GetType() == typeof(TestMessage2) || message.GetType() == typeof(TestMessage));
         }
 
         public void Handle(object message)

@@ -188,32 +188,33 @@ namespace Umbrella.DDD.Tests
             Assert.Pass();
         }
 
-        // [Test]
-        // public void PublishingAllMessages_SagaCanBeCompleted()
-        // {
-        //     //********* GIVEN
-        //     ILogger logger = new Mock<ILogger>().Object;
-        //     var publisher = new Mock<IEventPublisher>();
-        //     publisher.Setup(x => x.PublishEvent<TestMessage>(It.IsAny<TestMessage>())).Returns(Guid.NewGuid().ToString());
-        //     var services = new ServiceCollection();
-        //     services.AddSingleton<IRepository<Saga1Status>>(MockStatusRepo());
-        //     services.AddSingleton<ISaga, Saga3>();
-        //     IServiceProvider provider = services.BuildServiceProvider();
-        //     this._Bus = new MessageBus(logger, publisher.Object, provider);
-        //     Assert.That(this._Saga1StatusList.Count, Is.EqualTo(0), "Precondition: SAGA not started (status null) failed");
+        [Test]
+        public void PublishingAllMessages_SagaCanBeCompleted()
+        {
+            //********* GIVEN
+            ILogger logger = new Mock<ILogger>().Object;
+            var publisher = new Mock<IEventPublisher>();
+            publisher.Setup(x => x.PublishEvent<TestMessage>(It.IsAny<TestMessage>())).Returns(Guid.NewGuid().ToString());
+            var services = new ServiceCollection();
+            // registering saga that is nadling the 2 types of messages below
+            services.AddSingleton<IRepository<Saga1Status>>(MockStatusRepo());
+            services.AddSingleton<ISaga, Saga3>();
+            IServiceProvider provider = services.BuildServiceProvider();
+            this._Bus = new MessageBus(logger, publisher.Object, provider);
+            Assert.That(this._Saga1StatusList.Count, Is.EqualTo(0), "Precondition: SAGA not started (status null) failed");
 
-        //     //********* WHEN
-        //     this._Bus.PublishEvent(new TestMessage("SSSSS"));
-        //     this._Bus.PublishEvent(new TestMessage2("END"));
+            //********* WHEN
+            this._Bus.PublishEvent(new TestMessage("SSSSS"));
+            this._Bus.PublishEvent(new TestMessage2("END"));
 
-        //     //********* WHEN
-        //     Assert.That(this._Saga1StatusList.Count, Is.EqualTo(1));
-        //     Assert.That(this._Saga1StatusList[0].Message, Is.EqualTo("SSSSS"));
-        //     Assert.That(this._Saga1StatusList[0].SagaName, Is.EqualTo("Test1"));
-        //     Assert.That(this._Saga1StatusList[0].SagaId, Is.Not.EqualTo(Guid.Empty.ToString()));
-        //     Assert.False(this._Saga1StatusList[0].IsRunning);
-        //     Assert.True(this._Saga1StatusList[0].IsCompleted);
-        //     Assert.Pass();
-        // }
+            //********* WHEN
+            Assert.That(this._Saga1StatusList.Count, Is.EqualTo(1));
+            Assert.That(this._Saga1StatusList[0].Message, Is.EqualTo("SSSSS"));
+            Assert.That(this._Saga1StatusList[0].SagaName, Is.EqualTo("Test1"));
+            Assert.That(this._Saga1StatusList[0].SagaId, Is.Not.EqualTo(Guid.Empty.ToString()));
+            Assert.False(this._Saga1StatusList[0].IsRunning);
+            Assert.True(this._Saga1StatusList[0].IsCompleted);
+            Assert.Pass();
+        }
     }
 }
