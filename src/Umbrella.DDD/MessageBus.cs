@@ -72,11 +72,11 @@ namespace Umbrella.DDD
                                                                 return false;
 
                                                             // extract only handlers, not Saga
-                                                            ISaga? s = (ISaga)x;
+                                                            ISaga? s = x as ISaga;
                                                             if(s != null)
                                                                 return false;
                                                             // check that searched for interface is succesffully implemented
-                                                            IMessageHandler? h = (IMessageHandler)x;
+                                                            IMessageHandler? h = x as IMessageHandler;
                                                             return h != null;
                                                         })
                                                         .Select(x => (IMessageHandler)x)
