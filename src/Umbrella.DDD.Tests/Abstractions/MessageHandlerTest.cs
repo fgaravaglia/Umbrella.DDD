@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Moq;
 using NUnit.Framework;
 using System;
 using Umbrella.DDD.Abstractions;
@@ -25,7 +27,7 @@ public class MessageHandlerTests
 
     class TestMessagehandler : MessageHandler<TestMessage>
     { 
-        public TestMessagehandler() : base() {  }
+        public TestMessagehandler(ILogger logger) : base(logger) {  }
 
         public override void HandleThisMessage(TestMessage message)
         { }
@@ -38,7 +40,7 @@ public class MessageHandlerTests
     [SetUp]
     public void Setup()
     {
-        this._Handler =new TestMessagehandler();
+        this._Handler = new TestMessagehandler(new Mock<ILogger>().Object);
     }
 
     [Test]
@@ -46,7 +48,7 @@ public class MessageHandlerTests
     {
         //********* GIVEN
         TestMessage msg = null;
-        var handler = new TestMessagehandler();
+        var handler = new TestMessagehandler(new Mock<ILogger>().Object);
 
         //********* WHEN
         TestDelegate testCode = () => handler.CanHandleThisMessage(msg);

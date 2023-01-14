@@ -23,5 +23,10 @@ namespace Umbrella.DDD.Abstractions
         /// </summary>
         /// <value></value>
         DateTime PublishedOn { get; }
+        /// <summary>
+        /// message Type
+        /// </summary>
+        /// <value></value>
+        string MessageType { get; }
     }
 }

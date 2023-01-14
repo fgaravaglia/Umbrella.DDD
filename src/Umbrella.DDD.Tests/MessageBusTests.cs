@@ -2,13 +2,10 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
-using NUnit.Framework.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using Umbrella.DDD.Abstractions;
 using Umbrella.DDD.Tests.TestClasses;
 using TestMessage = Umbrella.DDD.Tests.TestClasses.TestMessage;
@@ -19,10 +16,13 @@ namespace Umbrella.DDD.Tests
 {
     public class MessageBusTests
     {
+        Mock<ILogger> _Logger;
+        Mock<IRepository<Saga1Status>> _Repository;
+        Mock<IEventPublisher> _Publisher;
         IMessageBus _Bus;
         List<Saga1Status> _Saga1StatusList;
 
-        IRepository<Saga1Status> MockStatusRepo()
+        Mock<IRepository<Saga1Status>> MockStatusRepo()
         {
             var repo = new Mock<IRepository<Saga1Status>>();
             repo.Setup(x => x.Save(It.IsAny<Saga1Status>())).Callback<Saga1Status>(x =>
@@ -36,15 +36,20 @@ namespace Umbrella.DDD.Tests
                 existing.IsCompleted = x.IsCompleted;
             });
             repo.Setup(x => x.GetById(It.IsAny<string>())).Returns<string>(x => this._Saga1StatusList.SingleOrDefault(s => s.SagaId == x));
-            return repo.Object;
+            return repo;
         }
 
         [SetUp]
         public void Setup()
         {
+            this._Logger = new Mock<ILogger>();
+            this._Publisher = new Mock<IEventPublisher>();
+            this._Publisher.Setup(x => x.PublishMessage(It.IsAny<IMessage>())).Returns(Guid.NewGuid().ToString());
             this._Saga1StatusList = new List<Saga1Status>();
+            this._Repository = MockStatusRepo();
         }
 
+        #region Tests on constructor
         [Test]
         public void Constructor_ThrowEx_ifLoggerIsNull()
         {
@@ -96,21 +101,21 @@ namespace Umbrella.DDD.Tests
             Assert.Pass();
         }
 
+        #endregion
+
         [Test]
         public void Publish_ReturnsNotNullMessageId()
         {
             //********* GIVEN
-            ILogger logger = new Mock<ILogger>().Object;
-            var publisher = new Mock<IEventPublisher>();
-            publisher.Setup(x => x.PublishEvent<TestMessage>(It.IsAny<TestMessage>())).Returns(Guid.NewGuid().ToString());
             var services = new ServiceCollection();
+            services.AddSingleton<ILogger>(x => this._Logger.Object);
             services.AddTransient<IMessageHandler<TestMessage>, TestMessageHandler>();
             services.AddTransient<IMessageHandler<TestMessage>, NewTestMessageHandler>();
             IServiceProvider provider = services.BuildServiceProvider();
-            this._Bus = new MessageBus(logger, publisher.Object, provider);
+            this._Bus = new MessageBus(this._Logger.Object, this._Publisher.Object, provider);
 
             //********* WHEN
-            string msgId = this._Bus.PublishEvent(new TestMessage("SSSSS"));
+            string msgId = this._Bus.PublishMessage(new TestMessage("SSSSS"));
 
             //********* WHEN
             Assert.False(String.IsNullOrEmpty(msgId));
@@ -121,15 +126,12 @@ namespace Umbrella.DDD.Tests
         public void Publish_ReturnsNotNullMessageId_EvenThereAreNoHandlers()
         {
             //********* GIVEN
-            ILogger logger = new Mock<ILogger>().Object;
-            var publisher = new Mock<IEventPublisher>();
-            publisher.Setup(x => x.PublishEvent<TestMessage>(It.IsAny<TestMessage>())).Returns(Guid.NewGuid().ToString());
             var services = new ServiceCollection();
             IServiceProvider provider = services.BuildServiceProvider();
-            this._Bus = new MessageBus(logger, publisher.Object, provider);
+            this._Bus = new MessageBus(this._Logger.Object, this._Publisher.Object, provider);
 
             //********* WHEN
-            string msgId = this._Bus.PublishEvent(new TestMessage("SSSSS"));
+            string msgId = this._Bus.PublishMessage(new TestMessage("SSSSS"));
 
             //********* WHEN
             Assert.False(String.IsNullOrEmpty(msgId));
@@ -137,21 +139,93 @@ namespace Umbrella.DDD.Tests
         }
 
         [Test]
+        [Description(@"This test has been added to  replicate a bug context (#3).
+        A message from generic list of events does not resolve succesfully the handler")]
+        public void Publish_FromListOfMessages_InvokesExpectedHandler()
+        {
+            //********* GIVEN
+            var services = new ServiceCollection();
+            var handler = new Mock<IMessageHandler<Umbrella.DDD.Tests.TestClasses.TestMessage>>();
+            handler.Setup(x => x.CanHandleThisMessage(It.IsAny<IMessage>())).Returns(true);
+            services.AddSingleton<ILogger>(x => this._Logger.Object);
+            services.AddScoped<IMessageHandler<TestMessage>>(x => handler.Object);
+            IServiceProvider provider = services.BuildServiceProvider();
+            this._Bus = new MessageBus(this._Logger.Object, this._Publisher.Object, provider);
+            var messages = new List<IMessage>(){new TestMessage("SSSSS") };
+
+            //********* WHEN
+            string msgId = this._Bus.PublishMessage(messages[0]);
+
+            //********* WHEN
+            Assert.False(String.IsNullOrEmpty(msgId));
+            handler.Verify(x => x.TryHandleMessage(It.IsAny<IMessage>()), Times.Once);
+            Assert.Pass();
+        }
+
+        [Test]
+        [Description(@"This test has been added to  replicate a bug context (#3).
+        A message from generic list of events does not resolve succesfully the handler")]
+        public void Publish_FromListOfMessages_InvokesExpectedHandler_And_SkipsSaga()
+        {
+            //********* GIVEN
+            var services = new ServiceCollection();
+            var handler = new Mock<IMessageHandler<Umbrella.DDD.Tests.TestClasses.TestMessage>>();
+            handler.Setup(x => x.CanHandleThisMessage(It.IsAny<IMessage>())).Returns(true);
+            services.AddSingleton<ILogger>(x => this._Logger.Object);
+            services.AddScoped<IMessageHandler<TestMessage>>(x => handler.Object);
+            services.AddSingleton<IRepository<Saga1Status>>(this._Repository.Object);
+            services.AddTransient<ISaga, Saga1>();
+            services.AddTransient<ISaga, Saga2>();
+            IServiceProvider provider = services.BuildServiceProvider();
+            this._Bus = new MessageBus(this._Logger.Object, this._Publisher.Object, provider);
+            var messages = new List<IMessage>() { new TestMessage("SSSSS") };
+
+            //********* WHEN
+            string msgId = this._Bus.PublishMessage(messages[0]);
+
+            //********* WHEN
+            Assert.False(String.IsNullOrEmpty(msgId));
+            handler.Verify(x => x.TryHandleMessage(It.IsAny<IMessage>()), Times.Once);
+            Assert.Pass();
+        }
+
+        [Test]
+        public void Publish_FromListOfMessages_WithHandlersDisabled_DoesNotInvokesAnyHandler()
+        {
+            //********* GIVEN
+            var services = new ServiceCollection();
+            var handler = new Mock<IMessageHandler<Umbrella.DDD.Tests.TestClasses.TestMessage>>();
+            handler.Setup(x => x.CanHandleThisMessage(It.IsAny<IMessage>())).Returns(true);
+            services.AddSingleton<ILogger>(x => this._Logger.Object);
+            services.AddScoped<IMessageHandler<TestMessage>>(x => handler.Object);
+            IServiceProvider provider = services.BuildServiceProvider();
+            this._Bus = new MessageBus(this._Logger.Object, this._Publisher.Object, provider, enableInMemoryEventHandlers: false);
+            var messages = new List<IMessage>() { new TestMessage("SSSSS") };
+
+            //********* WHEN
+            string msgId = this._Bus.PublishMessage(messages[0]);
+
+            //********* WHEN
+            Assert.False(String.IsNullOrEmpty(msgId));
+            handler.Verify(x => x.TryHandleMessage(It.IsAny<IMessage>()), Times.Never);
+            Assert.Pass();
+        }
+
+        #region Tests on Saga Management
+
+        [Test]
         public void Publish_Runs_The_Saga_And_StatusIsPersisted()
         {
             //********* GIVEN
-            ILogger logger = new Mock<ILogger>().Object;
-            var publisher = new Mock<IEventPublisher>();
-            publisher.Setup(x => x.PublishEvent<TestMessage>(It.IsAny<TestMessage>())).Returns(Guid.NewGuid().ToString());
             var services = new ServiceCollection();
-            services.AddSingleton<IRepository<Saga1Status>>(MockStatusRepo());
+            services.AddSingleton<IRepository<Saga1Status>>(MockStatusRepo().Object);
             services.AddTransient<ISaga, Saga1>();
             IServiceProvider provider = services.BuildServiceProvider();
-            this._Bus = new MessageBus(logger, publisher.Object, provider);
+            this._Bus = new MessageBus(this._Logger.Object, this._Publisher.Object, provider);
             Assert.That(this._Saga1StatusList.Count, Is.EqualTo(0), "Precondition: SAGA not started (status null) failed");
 
             //********* WHEN
-            string msgId = this._Bus.PublishEvent(new TestMessage("SSSSS"));
+            string msgId = this._Bus.PublishMessage(new TestMessage("SSSSS"));
 
             //********* WHEN
             Assert.False(String.IsNullOrEmpty(msgId));
@@ -168,19 +242,16 @@ namespace Umbrella.DDD.Tests
         public void Publish_Runs_AllExpectedSaga_WithRelatedStatus()
         {
             //********* GIVEN
-            ILogger logger = new Mock<ILogger>().Object;
-            var publisher = new Mock<IEventPublisher>();
-            publisher.Setup(x => x.PublishEvent<TestMessage>(It.IsAny<TestMessage>())).Returns(Guid.NewGuid().ToString());
             var services = new ServiceCollection();
-            services.AddSingleton<IRepository<Saga1Status>>(MockStatusRepo());
+            services.AddSingleton<IRepository<Saga1Status>>(this._Repository.Object);
             services.AddTransient<ISaga, Saga1>();
             services.AddTransient<ISaga, Saga2>();
             IServiceProvider provider = services.BuildServiceProvider();
-            this._Bus = new MessageBus(logger, publisher.Object, provider);
+            this._Bus = new MessageBus(this._Logger.Object, this._Publisher.Object, provider);
             Assert.That(this._Saga1StatusList.Count, Is.EqualTo(0), "Precondition: SAGA not started (status null) failed");
 
             //********* WHEN
-            string msgId = this._Bus.PublishEvent(new TestMessage("SSSSS"));
+            string msgId = this._Bus.PublishMessage(new TestMessage("SSSSS"));
 
             //********* WHEN
             Assert.False(String.IsNullOrEmpty(msgId));
@@ -192,19 +263,17 @@ namespace Umbrella.DDD.Tests
         public void PublishingAllMessages_SagaCanBeCompleted()
         {
             //********* GIVEN
-            ILogger logger = new Mock<ILogger>().Object;
-            var publisher = new Mock<IEventPublisher>();
-            publisher.Setup(x => x.PublishEvent<TestMessage>(It.IsAny<TestMessage>())).Returns(Guid.NewGuid().ToString());
             var services = new ServiceCollection();
-            services.AddSingleton<IRepository<Saga1Status>>(MockStatusRepo());
+            // registering saga that is nadling the 2 types of messages below
+            services.AddSingleton<IRepository<Saga1Status>>(this._Repository.Object);
             services.AddSingleton<ISaga, Saga3>();
             IServiceProvider provider = services.BuildServiceProvider();
-            this._Bus = new MessageBus(logger, publisher.Object, provider);
+            this._Bus = new MessageBus(this._Logger.Object, this._Publisher.Object, provider);
             Assert.That(this._Saga1StatusList.Count, Is.EqualTo(0), "Precondition: SAGA not started (status null) failed");
 
             //********* WHEN
-            this._Bus.PublishEvent(new TestMessage("SSSSS"));
-            this._Bus.PublishEvent(new TestMessage2("END"));
+            this._Bus.PublishMessage(new TestMessage("SSSSS"));
+            this._Bus.PublishMessage(new TestMessage2("END"));
 
             //********* WHEN
             Assert.That(this._Saga1StatusList.Count, Is.EqualTo(1));
@@ -215,5 +284,7 @@ namespace Umbrella.DDD.Tests
             Assert.True(this._Saga1StatusList[0].IsCompleted);
             Assert.Pass();
         }
+    
+        #endregion
     }
 }

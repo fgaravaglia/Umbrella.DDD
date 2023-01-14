@@ -98,14 +98,13 @@ namespace Umbrella.DDD.GCP
         #endregion
 
         /// <summary>
-        /// <inheritdoc cref="IEventPublisher.PublishEvent{T}(T)"/>
+        /// <inheritdoc cref="IEventPublisher.PublishMessage(IMessage)"/>
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="msg"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public string PublishEvent<T>(T msg) where T : IMessage
+        public string PublishMessage(IMessage msg)
         {
             if (msg == null)
                 throw new ArgumentNullException(nameof(msg));
@@ -114,16 +113,17 @@ namespace Umbrella.DDD.GCP
             if (msg.ID.ToLowerInvariant() == Guid.Empty.ToString().ToLowerInvariant())
                 throw new ArgumentException("Message ID cannot be Empty", nameof(msg));
 
-            if (!this._Topics.ContainsKey(typeof(T)))
+            var messageType = msg.GetType();
+            if (!this._Topics.ContainsKey(messageType))
             {
-                this._Logger.LogInformation("{Type} has not been registered. the handler is supposed to be on memory", typeof(T));
+                this._Logger.LogInformation("{Type} has not been registered. the handler is supposed to be on memory",messageType);
                 return Guid.NewGuid().ToString();
             }
 
             // get the topic, than publish
-            var topic = this._Topics[typeof(T)];
+            var topic = this._Topics[messageType];
             string jsonMsg = ToJson(msg);
-            this._Logger.LogInformation("Publishing message {messageType} on topic {targetTopic}", typeof(T), topic);
+            this._Logger.LogInformation("Publishing message {messageType} on topic {targetTopic}", messageType, topic);
             string msgId = PublishMessageOnTopic(topic, jsonMsg, new Dictionary<string, string>());
             this._Logger.LogInformation("Message succesfully published");
             return msgId;

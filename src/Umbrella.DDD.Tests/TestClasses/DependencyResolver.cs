@@ -13,8 +13,8 @@ namespace Umbrella.DDD.Tests.TestClasses
     {
         public IServiceCollection AddEventHandlers(IServiceCollection services)
         {
-            services.AddTransient<IMessageHandler<TestMessage>>(x => new TestMessageHandler());
-            services.AddTransient<IMessageHandler<TestMessage>>(x => new NewTestMessageHandler());
+            services.AddTransient<IMessageHandler<TestMessage>, TestMessageHandler>();
+            services.AddTransient<IMessageHandler<TestMessage>, NewTestMessageHandler>();
             return services;
         }
 

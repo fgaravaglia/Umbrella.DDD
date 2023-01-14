@@ -56,7 +56,7 @@ namespace Umbrella.DDD.Domain.Persistence
            {
                 try
                 {
-                    this._Bus.PublishEvent(msg);
+                    this._Bus.PublishMessage(msg);
                 }
                 catch(Exception ex)
                 {

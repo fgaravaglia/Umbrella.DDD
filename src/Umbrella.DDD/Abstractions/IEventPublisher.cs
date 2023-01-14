@@ -1,3 +1,5 @@
+using System;
+
 namespace Umbrella.DDD.Abstractions
 {
     /// <summary>
@@ -10,7 +12,7 @@ namespace Umbrella.DDD.Abstractions
         /// </summary>
         /// <param name="msg">message to be published</param>
         /// <returns>ID of puplished message</returns>
-        string PublishEvent<T>(T msg) where T : IMessage;
+        string PublishMessage(IMessage msg);
         /// <summary>
         /// Sets the target queue or topic for a given type
         /// </summary>
