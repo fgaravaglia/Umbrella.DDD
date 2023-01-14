@@ -54,7 +54,7 @@ namespace Umbrella.DDD
             });
 
             // Check if saga need to be run
-            var sagas = this._ServiceProvider.GetServices<ISaga>().Where(x => x.CanHandleThis<T>()).ToList();
+            var sagas = this._ServiceProvider.GetServices<ISaga>().Where(x => x.CanHandleThisMessage(msg)).ToList();
             this._Logger.LogInformation("Found {sagaCounter} sagas to verify", sagas.Count);
             Parallel.ForEach(sagas, x =>
             {

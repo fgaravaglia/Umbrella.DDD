@@ -54,13 +54,20 @@ namespace Umbrella.DDD.Abstractions.LongRunningProcesses
             this.Status = initialStatus ?? throw new ArgumentNullException(nameof(initialStatus));
             this.Status.Initialize(Guid.NewGuid().ToString(), this.Name);
         }
-    
+
 
         #region Public Methods
         /// <summary>
-        /// <inheritdoc cref="ISaga.CanHandleThis{T}"/>
+        /// <inheritdoc cref="ISaga.CanHandleThisType{T}"/>
         /// </summary>
-        public abstract bool CanHandleThis<T>() where T : IMessage;
+        public abstract bool CanHandleThisType<T>() where T : IMessage;
+
+        /// <summary>
+        /// Checks if saga can manage this event or not
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public abstract bool CanHandleThisMessage(IMessage msg);
 
         /// <summary>
         /// <inheritdoc cref="ISaga.PersistStatus"/>

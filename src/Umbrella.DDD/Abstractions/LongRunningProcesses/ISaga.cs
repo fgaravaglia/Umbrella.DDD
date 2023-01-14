@@ -34,7 +34,13 @@ namespace Umbrella.DDD.Abstractions
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        bool CanHandleThis<T>() where T : IMessage;
+        bool CanHandleThisType<T>() where T : IMessage;
+        /// <summary>
+        /// Checks if saga can manage this event or not
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        bool CanHandleThisMessage(IMessage msg);
         /// <summary>
         /// 
         /// </summary>

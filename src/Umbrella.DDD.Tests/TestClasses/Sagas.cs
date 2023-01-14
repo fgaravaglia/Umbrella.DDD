@@ -41,9 +41,14 @@ namespace Umbrella.DDD.Tests.TestClasses
         
         }
 
-        public override bool CanHandleThis<T>()
+        public override bool CanHandleThisType<T>()
         {
             return (typeof(T) == typeof(TestMessage));
+        }
+
+        public override bool CanHandleThisMessage(IMessage message)
+        {
+            return (message.GetType() == typeof(TestMessage));
         }
 
         protected override void StartSagaFromMessage<T>(T message)
@@ -61,9 +66,14 @@ namespace Umbrella.DDD.Tests.TestClasses
 
         }
 
-        public override bool CanHandleThis<T>()
+        public override bool CanHandleThisType<T>()
         {
             return (typeof(T) == typeof(TestMessage));
+        }
+
+        public override bool CanHandleThisMessage(IMessage message)
+        {
+            return (message.GetType() == typeof(TestMessage));
         }
 
         protected override void StartSagaFromMessage<T>(T message)
@@ -81,12 +91,12 @@ namespace Umbrella.DDD.Tests.TestClasses
 
         }
 
-        public override bool CanHandleThis<T>()
+        public override bool CanHandleThisType<T>()
         {
             return (typeof(T) == typeof(TestMessage) || typeof(T) == typeof(TestMessage2));
         }
 
-        public bool CanHandleThisMessage(IMessage message)
+        public override bool CanHandleThisMessage(IMessage message)
         {
             return (message.GetType() == typeof(TestMessage2));
         }
