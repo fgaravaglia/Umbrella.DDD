@@ -87,3 +87,49 @@ services.AddApplicationModules(new MyApplicationModuleProvider())
 
 ```
 
+## How to add an Event Handler
+
+To implement a new event handler, you have to follow the snippet below:
+
+```c#
+   /// <summary>
+    /// Handlers to manage episode creations
+    /// </summary>
+    internal class TestEventHandler : MessageHandler<TestEventOccurred>
+    {
+        /// <summary>
+        /// Default COnstr
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="repo"></param>
+        public TestEventHandler(ILogger logger) : base(logger)
+        {
+        }
+        /// <summary>
+        /// handels the msg
+        /// </summary>
+        /// <param name="message"></param>
+        public override void HandleThisMessage(TestEventOccurred message)
+        {
+            this._Logger.LogInformation("Handling message {message}", message);
+
+            . . . .
+
+            this._Logger.LogInformation("Message succesfully handled");
+        }
+    }
+```
+
+then register the handler using a custom extension linke the one below:
+```c#
+        /// <summary>
+        /// Adds domains ervices
+        /// </summary>
+        /// <param name="services"></param>
+        public static void AddMyDomainEventHandlers(this IServiceCollection services)
+        {
+            services.AddScoped<IMessageHandler<TestEventOccurred>, TestEventHandler>();
+            // add here other domain event handlers
+            // . . .
+        }
+```
