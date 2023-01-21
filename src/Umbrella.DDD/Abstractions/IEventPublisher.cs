@@ -21,5 +21,13 @@ namespace Umbrella.DDD.Abstractions
         /// <returns></returns>
         void UsingThisQueueFor<T>(string queueName) where T : IMessage;
 
+        /// <summary>
+        /// Sets the target queue or topic for a given type
+        /// </summary>
+        /// <param name="eventType"></param>
+        /// <param name="queueName"></param>
+        /// <returns></returns>
+        void UsingThisQueueFor(string eventType, string queueName);
+
     }
 }

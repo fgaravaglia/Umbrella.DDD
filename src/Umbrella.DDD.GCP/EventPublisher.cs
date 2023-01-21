@@ -14,7 +14,7 @@ namespace Umbrella.DDD.GCP
     public class EventPublisher : IEventPublisher
     {
         readonly ILogger _Logger;
-        readonly Dictionary<Type, string> _Topics;
+        readonly Dictionary<string, string> _Topics;
         readonly string _ProjectId;
         readonly PublisherServiceApiClient _Publisher;
 
@@ -30,7 +30,7 @@ namespace Umbrella.DDD.GCP
             if (String.IsNullOrEmpty(projectID))
                 throw new ArgumentNullException(nameof(projectID));
             this._ProjectId = projectID;
-            this._Topics = new Dictionary<Type, string>();
+            this._Topics = new Dictionary<string, string>();
             this._Publisher = PublisherServiceApiClient.Create();
         }
 
@@ -114,14 +114,14 @@ namespace Umbrella.DDD.GCP
                 throw new ArgumentException("Message ID cannot be Empty", nameof(msg));
 
             var messageType = msg.GetType();
-            if (!this._Topics.ContainsKey(messageType))
+            if (!this._Topics.ContainsKey(messageType.FullName))
             {
                 this._Logger.LogInformation("{Type} has not been registered. the handler is supposed to be on memory",messageType);
                 return Guid.NewGuid().ToString();
             }
 
             // get the topic, than publish
-            var topic = this._Topics[messageType];
+            var topic = this._Topics[messageType.FullName];
             string jsonMsg = ToJson(msg);
             this._Logger.LogInformation("Publishing message {messageType} on topic {targetTopic}", messageType, topic);
             string msgId = PublishMessageOnTopic(topic, jsonMsg, new Dictionary<string, string>());
@@ -136,9 +136,23 @@ namespace Umbrella.DDD.GCP
         /// <exception cref="InvalidOperationException"></exception>
         public void UsingThisQueueFor<T>(string queueName) where T : IMessage
         {
-            if (this._Topics.ContainsKey(typeof(T)))
-                throw new InvalidOperationException($"Unable to set the Topic {queueName} for type {typeof(T).FullName}: type already assigned");
-            this._Topics.Add(typeof(T), queueName);
+            this.UsingThisQueueFor(typeof(T).FullName, queueName);
+        }
+        /// <summary>
+        /// Sets the target queue or topic for a given type
+        /// </summary>
+        /// <param name="eventType"></param>
+        /// <param name="queueName"></param>
+        /// <returns></returns>
+        public void UsingThisQueueFor(string eventType, string queueName)
+        {
+            if (String.IsNullOrEmpty(eventType))
+                throw new ArgumentNullException(nameof(eventType));
+            if (String.IsNullOrEmpty(queueName))
+                throw new ArgumentNullException(nameof(queueName));
+            if (_Topics.ContainsKey(eventType))
+                throw new InvalidOperationException($"Unable to set the Topic {queueName} for type {eventType}: type already assigned");
+            _Topics.Add(eventType, queueName);
         }
         /// <summary>
         /// Creates the topic

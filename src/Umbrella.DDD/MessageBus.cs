@@ -105,15 +105,7 @@ namespace Umbrella.DDD
                 return msgId;
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="queueName"></param>
-        public void UsingThisQueueFor<T>(string queueName) where T : IMessage
-        {
-            this._Publisher.UsingThisQueueFor<T>(queueName);
-        }
+       
 
         private void RunHandler(IMessageHandler handler, IMessage msg, int zeroBasedIndex)
         {

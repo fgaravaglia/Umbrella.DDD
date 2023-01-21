@@ -10,7 +10,7 @@ namespace Umbrella.DDD
     /// <remarks>Useful only for POC/Demo purposes. DO not use it in PROD</remarks>
     public class InMemoryPublisher : IEventPublisher
     {
-        readonly Dictionary<Type, string> _Topics;
+        readonly Dictionary<string, string> _Topics;
         readonly Dictionary<string, List<IMessage>> _MessagesPerTopic;
 
         /// <summary>
@@ -18,7 +18,7 @@ namespace Umbrella.DDD
         /// </summary>
         public InMemoryPublisher()
         {
-            _Topics = new Dictionary<Type, string>();
+            _Topics = new Dictionary<string, string>();
             _MessagesPerTopic = new Dictionary<string, List<IMessage>>();
         }
 
@@ -34,9 +34,9 @@ namespace Umbrella.DDD
             var targetType = msg.GetType();
 
             //If key exists, a topic has bee identiefied
-            if (_Topics.ContainsKey(targetType))
+            if (_Topics.ContainsKey(targetType.FullName))
             {
-                var topic = _Topics[targetType];
+                var topic = _Topics[targetType.FullName];
                 _MessagesPerTopic[topic].Add(msg);
             }
             return msg.ID;
@@ -48,9 +48,23 @@ namespace Umbrella.DDD
         /// <typeparam name="T"></typeparam>
         public void UsingThisQueueFor<T>(string queueName) where T : IMessage
         {
-            if (_Topics.ContainsKey(typeof(T)))
-                throw new InvalidOperationException($"Unable to set the Topic {queueName} for type {typeof(T).FullName}: type already assigned");
-            _Topics.Add(typeof(T), queueName);
+            this.UsingThisQueueFor(typeof(T).FullName, queueName);
+        }
+        /// <summary>
+        /// Sets the target queue or topic for a given type
+        /// </summary>
+        /// <param name="eventType"></param>
+        /// <param name="queueName"></param>
+        /// <returns></returns>
+        public void UsingThisQueueFor(string eventType, string queueName)
+        {
+            if (String.IsNullOrEmpty(eventType))
+                throw new ArgumentNullException(nameof(eventType));
+            if (String.IsNullOrEmpty(queueName))
+                throw new ArgumentNullException(nameof(queueName));
+            if (_Topics.ContainsKey(eventType))
+                throw new InvalidOperationException($"Unable to set the Topic {queueName} for type {eventType}: type already assigned");
+            _Topics.Add(eventType, queueName);
         }
     }
 }
