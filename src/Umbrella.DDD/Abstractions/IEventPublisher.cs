@@ -19,6 +19,7 @@ namespace Umbrella.DDD.Abstractions
         /// <param name="queueName"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        [Obsolete("To be dismissed. Please use UsingThisQueueFor(string, string) instead")]
         void UsingThisQueueFor<T>(string queueName) where T : IMessage;
 
         /// <summary>
