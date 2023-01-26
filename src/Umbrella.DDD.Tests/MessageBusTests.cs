@@ -148,7 +148,7 @@ namespace Umbrella.DDD.Tests
             var handler = new Mock<IMessageHandler<Umbrella.DDD.Tests.TestClasses.TestMessage>>();
             handler.Setup(x => x.CanHandleThisMessage(It.IsAny<IMessage>())).Returns(true);
             services.AddSingleton<ILogger>(x => this._Logger.Object);
-            services.AddScoped<IMessageHandler<TestMessage>>(x => handler.Object);
+            services.AddScoped<IMessageHandler>(x => handler.Object);
             IServiceProvider provider = services.BuildServiceProvider();
             this._Bus = new MessageBus(this._Logger.Object, this._Publisher.Object, provider);
             var messages = new List<IMessage>(){new TestMessage("SSSSS") };
@@ -172,7 +172,7 @@ namespace Umbrella.DDD.Tests
             var handler = new Mock<IMessageHandler<Umbrella.DDD.Tests.TestClasses.TestMessage>>();
             handler.Setup(x => x.CanHandleThisMessage(It.IsAny<IMessage>())).Returns(true);
             services.AddSingleton<ILogger>(x => this._Logger.Object);
-            services.AddScoped<IMessageHandler<TestMessage>>(x => handler.Object);
+            services.AddScoped<IMessageHandler>(x => handler.Object);
             services.AddSingleton<IRepository<Saga1Status>>(this._Repository.Object);
             services.AddTransient<ISaga, Saga1>();
             services.AddTransient<ISaga, Saga2>();

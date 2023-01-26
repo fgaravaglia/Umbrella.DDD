@@ -125,7 +125,7 @@ namespace Umbrella.DDD.GCP
             string jsonMsg = ToJson(msg);
             this._Logger.LogInformation("Publishing message {messageType} on topic {targetTopic}", messageType, topic);
             string msgId = PublishMessageOnTopic(topic, jsonMsg, new Dictionary<string, string>());
-            this._Logger.LogInformation("Message succesfully published");
+            this._Logger.LogInformation("Message {messageId} succesfully published", msgId);
             return msgId;
         }
         /// <summary>

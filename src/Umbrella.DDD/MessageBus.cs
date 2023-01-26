@@ -65,7 +65,7 @@ namespace Umbrella.DDD
                 if(this._EnableInMemoryEventHandlers)
                 {
                     // check if there are any hanldler of this message
-                    var handlers = this._ServiceProvider.GetServices(handlerType)
+                    var handlers = this._ServiceProvider.GetServices<IMessageHandler>()
                                                         .Where(x => 
                                                         {
                                                             if(x == null)

@@ -128,8 +128,10 @@ then register the handler using a custom extension linke the one below:
         /// <param name="services"></param>
         public static void AddMyDomainEventHandlers(this IServiceCollection services)
         {
-            services.AddScoped<IMessageHandler<TestEventOccurred>, TestEventHandler>();
+            services.AddScoped<IMessageHandler TestEventHandler>();
             // add here other domain event handlers
             // . . .
         }
 ```
+
+Please notice that you handlers must to be registered aas IMessageHandler.
