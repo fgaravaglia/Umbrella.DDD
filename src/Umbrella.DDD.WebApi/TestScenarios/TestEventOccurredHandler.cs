@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Umbrella.DDD.Abstractions;
 
-namespace Umbrella.DDD.Api.TestScenarios
+namespace Umbrella.DDD.WebApi.TestScenarios
 {
     public class TestEventOccurredHandler: MessageHandler<TestEventOccurred>
     {

@@ -7,7 +7,7 @@ using Umbrella.DDD.Abstractions;
 using Umbrella.DDD.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Umbrella.DDD.Api.TestScenarios
+namespace Umbrella.DDD.WebApi.TestScenarios
 {
     public class MessageBusDependencyResolver : IMessageBusDependencyResolver
     {

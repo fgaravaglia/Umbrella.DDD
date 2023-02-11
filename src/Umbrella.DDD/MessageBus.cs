@@ -49,10 +49,10 @@ namespace Umbrella.DDD
         /// <returns></returns>
         public string PublishMessage(IMessage msg)
         {
-            if(msg == null)
+            if (msg == null)
                 throw new ArgumentNullException(nameof(msg));
 
-            using(this._Logger.BeginScope("MessageContext: {msgId} {msgType}", msg.ID, msg.GetType()))
+            using (this._Logger.BeginScope("MessageContext: {msgId} {msgType}", msg.ID, msg.GetType()))
             {
                 // publis current message
                 this._Logger.LogInformation("Publishing Message {eventMessage}", msg);
@@ -62,30 +62,40 @@ namespace Umbrella.DDD
                 Type handlerType = typeof(IMessageHandler<>).MakeGenericType(targetMessageType);
                 this._Logger.LogInformation("Resolving handlers of type {handlerType}", handlerType);
 
-                if(this._EnableInMemoryEventHandlers)
+                if (this._EnableInMemoryEventHandlers)
                 {
-                    // check if there are any hanldler of this message
-                    var handlers = this._ServiceProvider.GetServices<IMessageHandler>()
-                                                        .Where(x => 
-                                                        {
-                                                            if(x == null)
-                                                                return false;
+                    var handlers = new List<IMessageHandler>();
 
-                                                            // extract only handlers, not Saga
-                                                            ISaga? s = x as ISaga;
-                                                            if(s != null)
-                                                                return false;
-                                                            // check that searched for interface is succesffully implemented
-                                                            IMessageHandler? h = x as IMessageHandler;
-                                                            return h != null;
-                                                        })
-                                                        .Select(x => (IMessageHandler)x)
-                                                        .Where(x => x != null && x.CanHandleThisMessage(msg))
-                                                        .ToList();
+                    // I need to use specific scope to get handlers, since they are scoped defined
+                    var serviceScopeFactory = this._ServiceProvider.GetService<IServiceScopeFactory>() ?? throw new NullReferenceException();
+                    using (var scope = serviceScopeFactory.CreateScope())
+                    {
+                        // finally get the services
+                        handlers = scope.ServiceProvider.GetServices<IMessageHandler>().ToList();
+                    }
+
+
+                    // check if there are any hanldler of this message
+                    handlers = handlers.Where(x =>
+                                   {
+                                       if (x == null)
+                                           return false;
+
+                                       // extract only handlers, not Saga
+                                       ISaga? s = x as ISaga;
+                                       if (s != null)
+                                           return false;
+                                       // check that searched for interface is succesffully implemented
+                                       IMessageHandler? h = x as IMessageHandler;
+                                       return h != null;
+                                   })
+                                   .Select(x => (IMessageHandler)x)
+                                   .Where(x => x != null && x.CanHandleThisMessage(msg))
+                                   .ToList();
                     this._Logger.LogInformation("Found {handlersCount} to handle the message {eventId} of {type}", handlers.Count, msg.ID, targetMessageType);
                     Parallel.ForEach(handlers, x =>
                     {
-                        if(x != null)
+                        if (x != null)
                         {
                             var index = handlers.IndexOf(x);
                             RunHandler(x, msg, index);
@@ -101,11 +111,11 @@ namespace Umbrella.DDD
                     var index = sagas.IndexOf(x);
                     RunSaga(x, msg, index);
                 });
-                
+
                 return msgId;
             }
         }
-       
+
 
         private void RunHandler(IMessageHandler handler, IMessage msg, int zeroBasedIndex)
         {
@@ -132,10 +142,10 @@ namespace Umbrella.DDD
                 {
                     // continue the saga
                     IMessageHandler? handler = saga as IMessageHandler;
-                    if(handler != null)
+                    if (handler != null)
                     {
                         var ex = handler.TryHandleMessage(msg);
-                        if(ex != null)
+                        if (ex != null)
                             this._Logger.LogError(ex, "Saga {sagaId} Failed!", saga.Id);
                     }
                     else

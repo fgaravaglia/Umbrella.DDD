@@ -1,6 +1,9 @@
+using System;
+using System.Diagnostics;
 using Serilog;
 using Serilog.Configuration;
-using System.Diagnostics;
+using Umbrella.DDD.WebApi;
+using Microsoft.Extensions.DependencyInjection;
 
 //Specify the activity id for tracing based on OpenTelemetry standard
 Activity.DefaultIdFormat = ActivityIdFormat.W3C;
@@ -12,17 +15,13 @@ Log.Logger = new LoggerConfiguration()
                     .WriteTo.Console()
                     .CreateBootstrapLogger();
 
-
 var builder = WebApplication.CreateBuilder(args);
-
 // Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
+builder.Services.AddServices(builder.Configuration, Log.Logger);
+builder.Host.UseSerilog();
+// generate Application
 var app = builder.Build();
+Log.Logger.Information("Middleware configuration started...");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -37,5 +36,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+Log.Logger.Information("Middleware configuration completed. Application running...");
 app.Run();
-

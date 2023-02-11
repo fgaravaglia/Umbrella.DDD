@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Text.Json.Serialization;
 using Umbrella.DDD.Abstractions;
 
-namespace Umbrella.DDD.Api.TestScenarios
+namespace Umbrella.DDD.WebApi.TestScenarios
 {
     public class TestEventOccurred : RetryableMessage
     {
