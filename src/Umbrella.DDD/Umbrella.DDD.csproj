@@ -9,8 +9,7 @@
 
   <PropertyGroup>
     <PackageId>Umbrella.DDD</PackageId>
-    <Version>0.1.0.0</Version>
-    <VersionNumber>0.1.0.0</VersionNumber>
+
     <Company>Innova Solutions</Company>
     <Authors>FG</Authors>
     <Description>Library to implement Core Feature based on Domain Driven Design</Description>
