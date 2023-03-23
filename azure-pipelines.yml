@@ -19,20 +19,6 @@ schedules:
       include:
         - main
 
-trigger:
-  branches:
-    include:
-      - develop
-      - main
-
-  paths:
-    include:
-      - src/*
-    exclude:
-      - libs/*
-      - devops/*
-      - scripts/*
-
 resources:
   repositories:
     # For type: github, name is <identity>/<repo> as in the examples above. For type: git (Azure Repos), name is <project>/<repo>.
@@ -51,7 +37,6 @@ parameters:
     displayName: "Publish Package to Nuget.Org"
     type: boolean
     default: False
-
 
 extends:
   template: dotnet-pakages-pipeline.1.0.yaml@coreTemplates
