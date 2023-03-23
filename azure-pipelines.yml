@@ -19,147 +19,60 @@ schedules:
       include:
         - main
 
-pool:
-  vmImage: "ubuntu-latest"
+trigger:
+  branches:
+    include:
+      - develop
+      - main
+
+  paths:
+    include:
+      - src/*
+    exclude:
+      - libs/*
+      - devops/*
+      - scripts/*
+
+resources:
+  repositories:
+    # For type: github, name is <identity>/<repo> as in the examples above. For type: git (Azure Repos), name is <project>/<repo>.
+    - repository: coreTemplates
+      type: git
+      name: Umbrella/Umbrella.Devops
+      ref: refs/heads/main
+      endpoint: Garaproject
 
 parameters:
-  - name: MajorVersion
-    displayName: "Major Version"
-    default: 1
-  - name: MinorVersion
-    displayName: "Minor Version"
-    default: 3
-  - name: PatchVersion
-    displayName: "Patch Version"
-    default: 0
-  - name: authors
-    displayName: "Names of authors of the target package"
-    default: "FG"
-  - name: company
-    displayName: "Company that produces the target package"
-    default: "Innova Solutions"
-  - name: copyright
-    displayName: "Copyright"
-    default: "FG 2022-2023"
-  - name: SonarScanEnabled
+  - name: inputSonarScanEnabled
     displayName: "Enable Sonar Scan"
     type: boolean
     default: True
-  - name: PublishPackage
+  - name: inputPublishPackage
     displayName: "Publish Package to Nuget.Org"
     type: boolean
     default: False
 
-variables:
-  buildConfiguration: "Release"
-  targetFramework: "6.x"
-  packageId: Umbrella.DDD
-  nugetVersion: ${{ parameters.MajorVersion }}.${{ parameters.MinorVersion }}.${{ parameters.PatchVersion }}.$(Build.BuildId)
-  testReportFileName: cobertura.xml
 
-stages:
-  - stage: Build
-    jobs:
-      - job: CI
-        steps:
-          #### use the right version of .Net core
-          - task: UseDotNet@2
-            displayName: Use .NET CORE target version
-            inputs:
-              packageType: "sdk"
-              version: "6.x"
-
-          - template: .\devops\templates\dotnet-tool-install-coverlet.yaml
-
-          - task: SonarCloudPrepare@1
-            displayName: "Prepare analysis on SonarCloud"
-            inputs:
-              SonarCloud: "SonarCloud"
-              organization: "fgaravaglia"
-              scannerMode: "MSBuild"
-              projectKey: $(packageId)
-              projectName: $(packageId)
-              projectVersion: "${{ parameters.MajorVersion }}.${{ parameters.MinorVersion }}"
-              extraProperties: |
-                # Additional properties that will be passed to the scanner,
-                # Put one key=value per line, example:
-                sonar.exclusions=**/obj/**,**/*.dll,**/*.Tests/**,**/*.Tests/**/*.cs
-                sonar.cs.vstest.reportsPaths=$(Agent.TempDirectory)/**/*.trx
-                sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/**/$(testReportFileName)
-                sonar.cs.vscoveragexml.reportsPaths=coverage.xml
-            condition: eq(${{ parameters.SonarScanEnabled }}, true)
-
-          - template: .\devops\templates\dotnet-build.yaml
-            parameters:
-              projPath: src/Umbrella.DDD.GCP
-              projName: Umbrella.DDD.GCP
-              publishRequired: false
-
-          - task: SonarCloudAnalyze@1
-            displayName: "Run Sonar Cloud Analysis"
-            condition: eq(${{ parameters.SonarScanEnabled }}, true)
-
-          - task: SonarCloudPublish@1
-            displayName: "Publish Sonar Cloud Analysis"
-            inputs:
-              pollingTimeoutSec: "300"
-            condition: eq(${{ parameters.SonarScanEnabled }}, true)
-
-          ############################## PUBLISH DROP #################################
-          - task: PublishBuildArtifacts@1
-            displayName: publish artifacts
-            inputs:
-              PathtoPublish: "$(Build.ArtifactStagingDirectory)"
-              ArtifactName: "drop"
-              publishLocation: "Container"
-
-  - stage: PackAndPush
-    dependsOn: Build
-    condition: in(dependencies.Build.result, 'Succeeded', 'SucceededWithIssues')
-    jobs:
-      - job: NugetPush
-        steps:
-          - task: DownloadSecureFile@1
-            name: nugetOrgKey
-            displayName: "Download Nuget Api Key"
-            inputs:
-              secureFile: "Nuget.apikey.txt"
-              retryCount: "5"
-
-          - powershell: |
-              $key = Get-Content -Path $(nugetOrgKey.secureFilePath)
-              Write-Host "##vso[task.setvariable variable=ReadApiKey;]$key"
-            displayName: Get Nuget.org NugetApiKey
-
-          # - powershell: |
-          #     Write-Host "Key ==> $(ReadApiKey)"
-          #   displayName: Print Nuget.org NugetApiKey
-
-          - template: .\devops\templates\dotnet-package-pack.yaml
-            parameters:
-              projPath: src/Umbrella.DDD
-              projName: Umbrella.DDD
-              MajorVersion: ${{ parameters.MajorVersion }}
-              MinorVersion: ${{ parameters.MinorVersion }}
-              PatchVersion: ${{ parameters.PatchVersion }}
-              buildNumber: $(Build.BuildId)
-
-          - template: .\devops\templates\dotnet-package-pack.yaml
-            parameters:
-              projPath: src/Umbrella.DDD.GCP
-              projName: Umbrella.DDD.GCP
-              MajorVersion: ${{ parameters.MajorVersion }}
-              MinorVersion: ${{ parameters.MinorVersion }}
-              PatchVersion: ${{ parameters.PatchVersion }}
-              buildNumber: $(Build.BuildId)
-
-          - task: DotNetCoreCLI@2
-            displayName: Push to Nuget.org
-            inputs:
-              command: "custom"
-              custom: nuget
-              arguments: >
-                push $(Build.ArtifactStagingDirectory)/*.*.nupkg
-                -s https://api.nuget.org/v3/index.json
-                -k $(ReadApiKey)
-            condition: eq(${{ parameters.PublishPackage }}, true)
+extends:
+  template: dotnet-pakages-pipeline.1.0.yaml@coreTemplates
+  parameters:
+    MajorVersion: 1
+    MinorVersion: 3
+    PatchVersion: 1
+    Copyright: "FG 2022-2023"
+    SonarScanEnabled: ${{ parameters.inputSonarScanEnabled }}
+    PublishPackage: ${{ parameters.inputPublishPackage }}
+    NugetSecretFileName: Nuget.apikey.txt
+    PackageId: Umbrella.DDD
+    # list of projects to build
+    ListOfProjToBuild:
+      - path: src/Umbrella.DDD.GCP
+        name: Umbrella.DDD.GCP
+        publishRequired: false
+        isWebProj: False
+    # list of packages to push on nuget repo
+    ListOfProjToPublish:
+      - path: src/Umbrella.DDD
+        name: Umbrella.DDD
+      - path: src/Umbrella.DDD.GCP
+        name: Umbrella.DDD.GCP
