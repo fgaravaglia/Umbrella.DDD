@@ -39,16 +39,19 @@ parameters:
     default: False
 
 extends:
-  template: dotnet-pakages-pipeline.1.0.yaml@coreTemplates
+  template: dotnet-pakages-pipeline.1.2.yaml@coreTemplates
   parameters:
     MajorVersion: 2
     MinorVersion: 0
     PatchVersion: 0
     Copyright: "FG 2022-2023"
     SonarScanEnabled: ${{ parameters.inputSonarScanEnabled }}
+    SonarSettings:
+      ProjectKey: Umbrella.DDD
+      ProjectName: Umbrella.DDD
+      TestReportFileName: cobertura.xml
     PublishPackage: ${{ parameters.inputPublishPackage }}
     NugetSecretFileName: Nuget.apikey.txt
-    PackageId: Umbrella.DDD
     # list of projects to build
     ListOfProjToBuild:
       - path: src/Umbrella.DDD.GCP
