@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <NoWarn>S1905;CS8603;S3925;S112;S2583;S3246;S3885;CS8600</NoWarn>
@@ -25,11 +25,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="microsoft.extensions.configuration" Version="6.0.1" />
-    <PackageReference Include="microsoft.extensions.configuration.Binder" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
-    <PackageReference Include="System.Text.Json" Version="7.0.0" />
+    <PackageReference Include="microsoft.extensions.configuration" Version="8.0.0" />
+    <PackageReference Include="microsoft.extensions.configuration.Binder" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.4" />
   </ItemGroup>
 
   <ItemGroup>
